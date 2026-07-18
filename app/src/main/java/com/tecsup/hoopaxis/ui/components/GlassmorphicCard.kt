@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 fun GlassmorphicCard(
     modifier: Modifier = Modifier,
     cornerRadius: Dp = 24.dp,
+    backgroundAlpha: Float = 0.05f, // Muy bajo para transparencia real
     content: @Composable () -> Unit
 ) {
     Box(
@@ -25,23 +26,24 @@ fun GlassmorphicCard(
             .background(
                 Brush.verticalGradient(
                     colors = listOf(
-                        Color.White.copy(alpha = 0.15f),
-                        Color.White.copy(alpha = 0.05f)
+                        Color.White.copy(alpha = backgroundAlpha + 0.05f),
+                        Color.White.copy(alpha = backgroundAlpha)
                     )
                 )
             )
             .border(
                 width = 1.dp,
-                brush = Brush.verticalGradient(
+                brush = Brush.linearGradient(
                     colors = listOf(
                         Color.White.copy(alpha = 0.3f),
                         Color.Transparent,
-                        Color.White.copy(alpha = 0.1f)
+                        Color(0xFF8E54E9).copy(alpha = 0.2f),
+                        Color.White.copy(alpha = 0.05f)
                     )
                 ),
                 shape = RoundedCornerShape(cornerRadius)
             )
-            .padding(16.dp)
+            .padding(20.dp)
     ) {
         content()
     }

@@ -13,12 +13,15 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+import com.tecsup.hoopaxis.data.model.RecentChapter
+
 /**
  * UI State for the Dashboard screen
  */
 data class DashboardUiState(
     val user: User? = null,
     val categories: List<RuleCategory> = emptyList(),
+    val recentChapters: List<RecentChapter> = emptyList(),
     val isLoading: Boolean = false,
     val greeting: String = "Buenos días"
 )
@@ -26,15 +29,18 @@ data class DashboardUiState(
 class DashboardViewModel(private val repository: RuleRepository) : ViewModel() {
 
     private val _isLoading = MutableStateFlow(false)
+    private val _recentChapters = MutableStateFlow<List<RecentChapter>>(emptyList())
 
     val uiState: StateFlow<DashboardUiState> = combine(
         repository.currentUser,
         repository.allCategories,
-        _isLoading
-    ) { user, categories, isLoading ->
+        _isLoading,
+        _recentChapters
+    ) { user, categories, isLoading, recentChapters ->
         DashboardUiState(
             user = user,
             categories = categories,
+            recentChapters = recentChapters,
             isLoading = isLoading
         )
     }.stateIn(
@@ -50,16 +56,26 @@ class DashboardViewModel(private val repository: RuleRepository) : ViewModel() {
     private fun loadInitialData() {
         viewModelScope.launch {
             _isLoading.value = true
-            // Mocking a small delay and check if categories exist
-            // In a real app, this would be a sync with API
+            
             repository.syncCategories(
                 listOf(
                     RuleCategory(1, "El Juego", 2, 0.75f, "🏀"),
                     RuleCategory(2, "Terreno y Equipamiento", 2, 0.50f, "🏟️"),
                     RuleCategory(3, "Los Equipos", 2, 0.25f, "👥"),
-                    RuleCategory(4, "Jugadores y Uniformes", 2, 0.00f, "👕")
+                    RuleCategory(4, "Jugadores y Uniformes", 2, 0.00f, "👕"),
+                    RuleCategory(5, "Reglas de Juego", 2, 0.00f, "⚡"),
+                    RuleCategory(6, "Violaciones", 2, 0.75f, "🚫"),
+                    RuleCategory(7, "Faltas", 2, 0.25f, "🚨"),
+                    RuleCategory(8, "Procedimientos Generales", 2, 0.00f, "📋")
                 )
             )
+
+            _recentChapters.value = listOf(
+                RecentChapter(1, "Cap. 2 — Duración y Períodos", "El Juego", 0.5f, "⏰"),
+                RecentChapter(2, "Cap. 5 — Composición del Equipo", "Los Equipos", 0.5f, "🧩"),
+                RecentChapter(3, "Cap. 12 — Reglas de Tiempo", "Violaciones", 0.5f, "⏰")
+            )
+
             _isLoading.value = false
         }
     }

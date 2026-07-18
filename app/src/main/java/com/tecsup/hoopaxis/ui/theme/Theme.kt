@@ -6,11 +6,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
 private val DarkColorScheme = darkColorScheme(
-    primary = PrimaryPurple,
-    secondary = SecondaryPurple,
+    primary = ProgressPurple,
+    secondary = ProgressCyan,
     tertiary = AccentYellow,
     background = Background,
-    surface = CardBackground,
+    surface = SurfaceColor,
     onPrimary = Color.White,
     onSecondary = Color.White,
     onTertiary = Background,
