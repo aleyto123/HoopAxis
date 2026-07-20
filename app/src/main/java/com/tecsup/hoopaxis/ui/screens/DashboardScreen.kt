@@ -41,12 +41,19 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.tecsup.hoopaxis.HoopAxisApplication
 import com.tecsup.hoopaxis.data.model.RecentChapter
 import com.tecsup.hoopaxis.data.model.RuleCategory
+import com.tecsup.hoopaxis.ui.components.BottomNavBar
 import com.tecsup.hoopaxis.ui.components.GlassmorphicCard
 import com.tecsup.hoopaxis.ui.theme.*
 import com.tecsup.hoopaxis.viewmodel.DashboardViewModel
 
 @Composable
-fun DashboardScreen(onNavigateToDetail: (Int) -> Unit = {}) {
+fun DashboardScreen(
+    onNavigateToDetail: (Int) -> Unit = {},
+    onNavigateToHome: () -> Unit = {},
+    onNavigateToRules: () -> Unit = {},
+    onNavigateToChapters: () -> Unit = {},
+    onNavigateToProfile: () -> Unit = {}
+) {
     val context = LocalContext.current
     val repository = (context.applicationContext as HoopAxisApplication).repository
     val viewModel: DashboardViewModel = viewModel(
@@ -68,7 +75,15 @@ fun DashboardScreen(onNavigateToDetail: (Int) -> Unit = {}) {
     }
 
     Scaffold(
-        bottomBar = { BottomNavBar() }
+        bottomBar = { 
+            BottomNavBar(
+                currentRoute = "inicio",
+                onHomeClick = onNavigateToHome,
+                onRulesClick = onNavigateToRules,
+                onChaptersClick = onNavigateToChapters,
+                onProfileClick = onNavigateToProfile
+            ) 
+        }
     ) { paddingValues ->
         Box(
             modifier = Modifier
@@ -571,47 +586,6 @@ fun PublicityBanner() {
                 contentDescription = null,
                 tint = AccentYellow,
                 modifier = Modifier.size(20.dp)
-            )
-        }
-    }
-}
-
-@Composable
-fun BottomNavBar() {
-    NavigationBar(
-        containerColor = BackgroundBase.copy(alpha = 0.98f),
-        tonalElevation = 0.dp
-    ) {
-        val navItems = listOf(
-            Triple("Inicio", Icons.Rounded.Home, true),
-            Triple("Reglas", Icons.AutoMirrored.Rounded.MenuBook, false),
-            Triple("Capítulos", Icons.Rounded.Description, false),
-            Triple("Perfil", Icons.Rounded.Person, false)
-        )
-        
-        navItems.forEach { (label, icon, selected) ->
-            NavigationBarItem(
-                icon = { 
-                    Icon(
-                        imageVector = icon, 
-                        contentDescription = null,
-                        tint = if (selected) NavSelected else NavUnselected,
-                        modifier = Modifier.size(28.dp)
-                    ) 
-                },
-                label = { 
-                    Text(
-                        text = label, 
-                        color = if (selected) NavSelected else NavUnselected,
-                        fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.Medium,
-                        fontSize = 11.sp
-                    ) 
-                },
-                selected = selected,
-                onClick = { },
-                colors = NavigationBarItemDefaults.colors(
-                    indicatorColor = Color.Transparent
-                )
             )
         }
     }

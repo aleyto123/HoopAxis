@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 import com.tecsup.hoopaxis.data.model.RuleCategory
 import com.tecsup.hoopaxis.data.model.User
 
-@Database(entities = [User::class, RuleCategory::class], version = 1, exportSchema = false)
+@Database(entities = [User::class, RuleCategory::class], version = 2, exportSchema = false)
 abstract class HoopAxisDatabase : RoomDatabase() {
     abstract fun dao(): HoopAxisDao
 
@@ -21,7 +21,9 @@ abstract class HoopAxisDatabase : RoomDatabase() {
                     context.applicationContext,
                     HoopAxisDatabase::class.java,
                     "hoopaxis_database"
-                ).build()
+                )
+                .fallbackToDestructiveMigration(dropAllTables = true)
+                .build()
                 INSTANCE = instance
                 instance
             }

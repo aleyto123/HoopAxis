@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "456317435908",
+    "project_id": "hoopaxis-93f2a",
+    "storage_bucket": "hoopaxis-93f2a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:456317435908:android:f7a97677905c9c26547551",
+        "android_client_info": {
+          "package_name": "com.tecsup.HoopAxis"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "456317435908-u1g33ki05v6out7i73g8dmlilp891udn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBOV8chQhMTeeQzKFs56GY5x50RVtqcZ_M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "456317435908-u1g33ki05v6out7i73g8dmlilp891udn.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

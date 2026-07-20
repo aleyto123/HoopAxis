@@ -7,7 +7,10 @@ import androidx.room.PrimaryKey
 data class RuleCategory(
     @PrimaryKey val id: Int,
     val title: String,
+    val description: String, // Nueva descripción
     val chaptersCount: Int,
+    val lessonsCount: Int, // Nuevas lecciones
     val progress: Float,
-    val iconEmoji: String
+    val iconEmoji: String,
+    val tagColorHex: String // Color para el R1, R2, etc.
 )
