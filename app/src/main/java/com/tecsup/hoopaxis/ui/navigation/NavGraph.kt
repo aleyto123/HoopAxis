@@ -13,6 +13,7 @@ import com.tecsup.hoopaxis.ui.screens.RuleDetailScreen
 import com.tecsup.hoopaxis.ui.screens.RulesScreen
 
 sealed class Screen(val route: String) {
+    object Login : Screen("login")
     object Dashboard : Screen("dashboard")
     object Rules : Screen("rules")
     object Chapters : Screen("chapters")
@@ -26,8 +27,17 @@ sealed class Screen(val route: String) {
 fun HoopAxisNavGraph(navController: NavHostController) {
     NavHost(
         navController = navController,
-        startDestination = Screen.Dashboard.route
+        startDestination = Screen.Login.route
     ) {
+        composable(Screen.Login.route) {
+            com.tecsup.hoopaxis.ui.screens.LoginScreen(
+                onNavigateToDashboard = {
+                    navController.navigate(Screen.Dashboard.route) {
+                        popUpTo(Screen.Login.route) { inclusive = true }
+                    }
+                }
+            )
+        }
         composable(Screen.Dashboard.route) {
             DashboardScreen(
                 onNavigateToDetail = { ruleId ->

@@ -54,6 +54,7 @@ dependencies {
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.auth)
     implementation(libs.google.auth)
+    implementation(libs.kotlinx.coroutines.play.services)
 
     // Room
     implementation(libs.androidx.room.runtime)

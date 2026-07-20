@@ -61,9 +61,7 @@ class DashboardViewModel(private val repository: RuleRepository) : ViewModel() {
         viewModelScope.launch {
             _isLoading.value = true
             
-            // Initial mock user if none exists
-            repository.login(User("1", "Árbitro", "arbitro@hoopaxis.com", isLoggedIn = true))
-
+            // Las categorías y datos iniciales se cargan normalmente
             repository.syncCategories(
                 listOf(
                     RuleCategory(1, "El Juego", "Definición, objeto y estructura del partido", 2, 4, 0.75f, "🏀", "#9D50BB"),
