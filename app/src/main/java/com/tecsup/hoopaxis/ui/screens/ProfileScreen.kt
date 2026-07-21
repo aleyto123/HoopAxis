@@ -22,10 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RadialGradientShader
-import androidx.compose.ui.graphics.Shader
-import androidx.compose.ui.graphics.ShaderBrush
-import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -34,7 +30,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.tecsup.hoopaxis.HoopAxisApplication
 import com.tecsup.hoopaxis.ui.components.BottomNavBar
-import com.tecsup.hoopaxis.ui.components.GlassmorphicCard
+import com.tecsup.hoopaxis.ui.components.GlassCard
 import com.tecsup.hoopaxis.ui.theme.*
 import com.tecsup.hoopaxis.viewmodel.DashboardViewModel
 
@@ -57,33 +53,22 @@ fun ProfileScreen(
     var showEditDialog by remember { mutableStateOf(false) }
     var editedName by remember { mutableStateOf("") }
 
-    val radialGlow = object : ShaderBrush() {
-        override fun createShader(size: androidx.compose.ui.geometry.Size): Shader {
-            return RadialGradientShader(
-                center = androidx.compose.ui.geometry.Offset(size.width / 2f, size.height * 0.15f),
-                radius = size.width * 1.5f,
-                colors = listOf(BackgroundGlow, BackgroundBase),
-                colorStops = listOf(0f, 1f),
-                tileMode = TileMode.Clamp
-            )
-        }
-    }
-
     if (showEditDialog) {
         AlertDialog(
             onDismissRequest = { showEditDialog = false },
-            containerColor = SurfaceColor,
-            title = { Text("Editar Nombre", color = Color.White, fontWeight = FontWeight.Black) },
+            containerColor = AppColors.Background,
+            title = { Text("Editar Nombre", style = MaterialTheme.typography.headlineMedium) },
             text = {
                 OutlinedTextField(
                     value = editedName,
                     onValueChange = { editedName = it },
-                    label = { Text("Nombre", color = Color.White.copy(alpha = 0.6f)) },
-                    textStyle = androidx.compose.ui.text.TextStyle(color = Color.White),
+                    label = { Text("Nombre", color = AppColors.TextSecondary) },
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = ProgressCyan,
+                        focusedBorderColor = AppColors.Purple,
                         unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
-                        cursorColor = ProgressCyan
+                        cursorColor = AppColors.Purple,
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White
                     ),
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -95,12 +80,12 @@ fun ProfileScreen(
                         showEditDialog = false
                     }
                 }) {
-                    Text("GUARDAR", color = ProgressCyan, fontWeight = FontWeight.Black)
+                    Text("GUARDAR", color = AppColors.Purple, fontWeight = FontWeight.Black)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showEditDialog = false }) {
-                    Text("CANCELAR", color = Color.White.copy(alpha = 0.5f))
+                    Text("CANCELAR", color = AppColors.TextSecondary)
                 }
             }
         )
@@ -115,305 +100,279 @@ fun ProfileScreen(
                 onChaptersClick = onNavigateToChapters,
                 onProfileClick = onNavigateToProfile
             ) 
-        }
+        },
+        containerColor = Color.Transparent
     ) { paddingValues ->
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(radialGlow)
                 .padding(paddingValues)
+                .padding(horizontal = 20.dp)
+                .verticalScroll(rememberScrollState())
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 20.dp)
-                    .verticalScroll(rememberScrollState())
+            Spacer(modifier = Modifier.height(32.dp))
+            
+            Text(
+                text = "Mi Perfil",
+                style = MaterialTheme.typography.displayLarge
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Activar Modo Árbitro Pro Banner
+            GlassCard(
+                modifier = Modifier.fillMaxWidth(),
+                categoryColor = AppColors.Gold
             ) {
-                Spacer(modifier = Modifier.height(32.dp))
-                
-                Text(
-                    text = "Mi Perfil",
-                    color = Color.White,
-                    fontSize = 32.sp,
-                    fontWeight = FontWeight.Black
-                )
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // Activar Modo Árbitro Pro Banner
-                GlassmorphicCard(
+                Row(
                     modifier = Modifier.fillMaxWidth(),
-                    cornerRadius = 20.dp,
-                    backgroundAlpha = 0.05f
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Rounded.EmojiEvents,
-                                contentDescription = null,
-                                tint = AccentYellow,
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Text(
-                                text = "Activar Modo Árbitro Pro",
-                                color = Color.White,
-                                fontSize = 15.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
-                            contentDescription = null,
-                            tint = Color.White.copy(alpha = 0.5f),
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // User Info Card
-                GlassmorphicCard(
-                    modifier = Modifier.fillMaxWidth(),
-                    cornerRadius = 28.dp,
-                    backgroundAlpha = 0.08f
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        // Avatar
-                        val userInitial = (uiState.user?.name ?: "A").take(1).uppercase()
-                        Box(
-                            modifier = Modifier
-                                .size(80.dp)
-                                .clip(RoundedCornerShape(20.dp))
-                                .background(
-                                    Brush.verticalGradient(
-                                        listOf(Color(0xFFFE8EBD), Color(0xFF9D50BB))
-                                    )
-                                ),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = userInitial,
-                                color = Color.White,
-                                fontSize = 36.sp,
-                                fontWeight = FontWeight.Black
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.width(16.dp))
-
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = uiState.user?.name ?: "Árbitro",
-                                color = Color.White,
-                                fontSize = 24.sp,
-                                fontWeight = FontWeight.Black
-                            )
-                            Text(
-                                text = "Nivel 4 — Árbitro Amateur",
-                                color = Color.White.copy(alpha = 0.5f),
-                                fontSize = 14.sp
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Row {
-                                repeat(4) {
-                                    Icon(
-                                        imageVector = Icons.Default.Star,
-                                        contentDescription = null,
-                                        tint = AccentYellow,
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                }
-                                Icon(
-                                    imageVector = Icons.Default.Star,
-                                    contentDescription = null,
-                                    tint = Color.White.copy(alpha = 0.2f),
-                                    modifier = Modifier.size(16.dp)
-                                )
-                            }
-                        }
-
-                        IconButton(
-                            onClick = { 
-                                editedName = uiState.user?.name ?: ""
-                                showEditDialog = true 
-                            },
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clip(CircleShape)
-                                .background(Color.White.copy(alpha = 0.1f))
-                                .border(1.dp, Color.White.copy(alpha = 0.2f), CircleShape)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Edit,
-                                contentDescription = "Editar",
-                                tint = Color.White.copy(alpha = 0.6f),
-                                modifier = Modifier.size(18.dp)
-                            )
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // XP Progress Bar
-                GlassmorphicCard(
-                    modifier = Modifier.fillMaxWidth(),
-                    cornerRadius = 24.dp,
-                    backgroundAlpha = 0.05f
-                ) {
-                    Column {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(
-                                text = "Nivel 4 — Árbitro Amateur",
-                                color = Color.White.copy(alpha = 0.5f),
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Medium
-                            )
-                            Text(
-                                text = "680 / 1000 XP",
-                                color = ProgressPurple,
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Black
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(12.dp))
-                        // Progress Bar
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(10.dp)
-                                .clip(CircleShape)
-                                .background(Color.White.copy(alpha = 0.05f))
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth(0.68f)
-                                    .fillMaxHeight()
-                                    .background(
-                                        Brush.horizontalGradient(
-                                            listOf(ProgressPurple, Color(0xFFFE8EBD))
-                                        )
-                                    )
-                            )
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // Stats Grid
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    StatCard(
-                        icon = Icons.Rounded.MenuBook,
-                        title = "3/16",
-                        subtitle = "Capítulos completados",
-                        modifier = Modifier.weight(1f)
-                    )
-                    Spacer(modifier = Modifier.width(16.dp))
-                    StatCard(
-                        icon = Icons.Rounded.TrendingUp,
-                        title = "31%",
-                        subtitle = "Progreso global",
-                        modifier = Modifier.weight(1f),
-                        iconTint = Color(0xFF00FF87)
-                    )
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    StatCard(
-                        icon = Icons.Rounded.ElectricBolt,
-                        title = "7 días 🔥",
-                        subtitle = "Racha activa",
-                        modifier = Modifier.weight(1f),
-                        iconTint = AccentYellow
-                    )
-                    Spacer(modifier = Modifier.width(16.dp))
-                    StatCard(
-                        icon = Icons.Rounded.TrackChanges,
-                        title = "82%",
-                        subtitle = "Precisión quiz",
-                        modifier = Modifier.weight(1f),
-                        iconTint = Color(0xFFFF4B2B)
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // Menu Items
-                GlassmorphicCard(
-                    modifier = Modifier.fillMaxWidth(),
-                    cornerRadius = 28.dp,
-                    backgroundAlpha = 0.05f
-                ) {
-                    Column {
-                        MenuItem(icon = Icons.Outlined.Notifications, label = "Notificaciones")
-                        Divider(color = Color.White.copy(alpha = 0.05f), modifier = Modifier.padding(vertical = 12.dp))
-                        MenuItem(icon = Icons.Rounded.Settings, label = "Configuración")
-                        Divider(color = Color.White.copy(alpha = 0.05f), modifier = Modifier.padding(vertical = 12.dp))
-                        MenuItem(icon = Icons.Rounded.StarOutline, label = "Calificar la app")
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // Logout Button
-                Button(
-                    onClick = onLogout,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(64.dp)
-                        .clip(RoundedCornerShape(24.dp))
-                        .background(Color(0xFFFF4B2B).copy(alpha = 0.1f))
-                        .border(1.dp, Color(0xFFFF4B2B).copy(alpha = 0.3f), RoundedCornerShape(24.dp)),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Rounded.Logout,
+                            imageVector = Icons.Rounded.EmojiEvents,
                             contentDescription = null,
-                            tint = Color(0xFFFF4B2B),
+                            tint = AppColors.Gold,
                             modifier = Modifier.size(20.dp)
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Text(
-                            text = "Cerrar sesión",
-                            color = Color(0xFFFF4B2B),
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold
+                            text = "Activar Modo Árbitro Pro",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = Color.White
+                        )
+                    }
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+                        contentDescription = null,
+                        tint = AppColors.TextSecondary,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // User Info Card
+            GlassCard(
+                modifier = Modifier.fillMaxWidth(),
+                categoryColor = AppColors.Purple
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Avatar
+                    val userInitial = (uiState.user?.name ?: "A").take(1).uppercase()
+                    Box(
+                        modifier = Modifier
+                            .size(80.dp)
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(
+                                Brush.verticalGradient(
+                                    listOf(AppColors.Pink, AppColors.Purple)
+                                )
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = userInitial,
+                            color = Color.White,
+                            fontSize = 36.sp,
+                            fontWeight = FontWeight.Black
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(16.dp))
+
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = uiState.user?.name ?: "Árbitro",
+                            style = MaterialTheme.typography.headlineMedium
+                        )
+                        Text(
+                            text = "Nivel 4 — Árbitro Amateur",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Row {
+                            repeat(4) {
+                                Icon(
+                                    imageVector = Icons.Default.Star,
+                                    contentDescription = null,
+                                    tint = AppColors.Gold,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
+                            Icon(
+                                imageVector = Icons.Default.Star,
+                                contentDescription = null,
+                                tint = AppColors.TextMuted,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    }
+
+                    IconButton(
+                        onClick = { 
+                            editedName = uiState.user?.name ?: ""
+                            showEditDialog = true 
+                        },
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = 0.1f))
+                            .border(1.dp, Color.White.copy(alpha = 0.2f), CircleShape)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = "Editar",
+                            tint = AppColors.TextSecondary,
+                            modifier = Modifier.size(18.dp)
                         )
                     }
                 }
-
-                Spacer(modifier = Modifier.height(32.dp))
             }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // XP Progress Bar
+            GlassCard(modifier = Modifier.fillMaxWidth()) {
+                Column {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = "Nivel 4 — Árbitro Amateur",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Text(
+                            text = "680 / 1000 XP",
+                            color = AppColors.Purple,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Black
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(10.dp)
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = 0.05f))
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(0.68f)
+                                .fillMaxHeight()
+                                .background(
+                                    Brush.horizontalGradient(
+                                        listOf(AppColors.Purple, AppColors.Pink)
+                                    )
+                                )
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Stats Grid
+            Row(modifier = Modifier.fillMaxWidth()) {
+                StatCard(
+                    icon = Icons.Rounded.MenuBook,
+                    title = "3/16",
+                    subtitle = "Capítulos completados",
+                    modifier = Modifier.weight(1f)
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+                StatCard(
+                    icon = Icons.Rounded.TrendingUp,
+                    title = "31%",
+                    subtitle = "Progreso global",
+                    modifier = Modifier.weight(1f),
+                    iconTint = AppColors.Green
+                )
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Row(modifier = Modifier.fillMaxWidth()) {
+                StatCard(
+                    icon = Icons.Rounded.ElectricBolt,
+                    title = "7 días 🔥",
+                    subtitle = "Racha activa",
+                    modifier = Modifier.weight(1f),
+                    iconTint = AppColors.Gold
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+                StatCard(
+                    icon = Icons.Rounded.TrackChanges,
+                    title = "82%",
+                    subtitle = "Precisión quiz",
+                    modifier = Modifier.weight(1f),
+                    iconTint = AppColors.Red
+                )
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Menu Items
+            GlassCard(modifier = Modifier.fillMaxWidth()) {
+                Column {
+                    MenuItem(icon = Icons.Outlined.Notifications, label = "Notificaciones")
+                    HorizontalDivider(color = Color.White.copy(alpha = 0.05f), modifier = Modifier.padding(vertical = 12.dp))
+                    MenuItem(icon = Icons.Rounded.Settings, label = "Configuración")
+                    HorizontalDivider(color = Color.White.copy(alpha = 0.05f), modifier = Modifier.padding(vertical = 12.dp))
+                    MenuItem(icon = Icons.Rounded.StarOutline, label = "Calificar la app")
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Logout Button
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(64.dp)
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(AppColors.Red.copy(alpha = 0.1f))
+                    .border(1.dp, AppColors.Red.copy(alpha = 0.3f), RoundedCornerShape(24.dp))
+                    .clickable { onLogout() },
+                contentAlignment = Alignment.Center
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Rounded.Logout,
+                        contentDescription = null,
+                        tint = AppColors.Red,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        text = "Cerrar sesión",
+                        color = AppColors.Red,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
         }
     }
 }
 
 @Composable
-fun StatCard(icon: ImageVector, title: String, subtitle: String, modifier: Modifier = Modifier, iconTint: Color = ProgressPurple) {
-    GlassmorphicCard(
-        modifier = modifier.height(130.dp),
-        cornerRadius = 24.dp,
-        backgroundAlpha = 0.05f
+fun StatCard(icon: ImageVector, title: String, subtitle: String, modifier: Modifier = Modifier, iconTint: Color = AppColors.Purple) {
+    GlassCard(
+        modifier = modifier.height(130.dp)
     ) {
         Column(verticalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxSize()) {
             Icon(imageVector = icon, contentDescription = null, tint = iconTint, modifier = Modifier.size(24.dp))
             Column {
-                Text(text = title, color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Black)
-                Text(text = subtitle, color = Color.White.copy(alpha = 0.5f), fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                Text(text = title, style = MaterialTheme.typography.bodyLarge, color = Color.White)
+                Text(text = subtitle, style = MaterialTheme.typography.labelSmall)
             }
         }
     }
@@ -427,14 +386,14 @@ fun MenuItem(icon: ImageVector, label: String) {
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(imageVector = icon, contentDescription = null, tint = Color.White.copy(alpha = 0.6f), modifier = Modifier.size(22.dp))
+            Icon(imageVector = icon, contentDescription = null, tint = AppColors.TextSecondary, modifier = Modifier.size(22.dp))
             Spacer(modifier = Modifier.width(16.dp))
-            Text(text = label, color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.ExtraBold)
+            Text(text = label, style = MaterialTheme.typography.bodyLarge, color = Color.White)
         }
         Icon(
             imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
             contentDescription = null,
-            tint = Color.White.copy(alpha = 0.3f),
+            tint = AppColors.TextMuted,
             modifier = Modifier.size(16.dp)
         )
     }

@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "456317435908-ljh732v7k9lpfo85qg4vp4e2vv0mkopl.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tecsup.hoopaxis",
+            "certificate_hash": "89beb96e5a4d1e4b4215de91a4ee96de77ea4c41"
+          }
+        },
+        {
           "client_id": "456317435908-u1g33ki05v6out7i73g8dmlilp891udn.apps.googleusercontent.com",
           "client_type": 3
         }

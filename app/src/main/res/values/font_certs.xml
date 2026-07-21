@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="com_google_android_gms_fonts_certs">
+        <item>@array/com_google_android_gms_fonts_certs_dev</item>
+        <item>@array/com_google_android_gms_fonts_certs_prod</item>
+    </array>
+    <string-array name="com_google_android_gms_fonts_certs_dev">
+        <item>
+            MIIEqDCCA5CgAwIBAgIJANWK9s6H6f9iMA0GCSqGSIb3DQEBBQUAMIGUMQswCQYDVQQGEwJVUzETMBEG
+            C1UECAwKQ2FsaWZvcm5pYTEWMBQGA1UEBwwNTW91bnRhaW4gVmlldzEQMA4GA1UECgwHR29vZ2xl
+            MRswGQYDVQQLDBJBbmRyb2lkIEZyYW1ld29yazEQMA4GA1UEAwwHQW5kcm9pZDAeFw0wODA4MjEy
+            MzEzMzlaFw0zNjAxMDcyMzEzMzlaMIGUMQswCQYDVQQGEwJVUzETMBEGA1UECAwKQ2FsaWZvcm5p
+            YTEWMBQGA1UEBwwNTW91bnRhaW4gVmlldzEQMA4GA1UECgwHR29vZ2xlMRswGQYDVQQLDBJBbmRy
+            b2lkIEZyYW1ld29yazEQMA4GA1UEAwwHQW5kcm9pZDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCC
+            AQoCggEBALa77XW9IInY816j2b988fOqfIe79t7e6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r
+            6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r
+            6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r
+            6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r
+            6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r
+            6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r
+            6a7r6a7r6a7rDAEBo4IBADCBADAdBgNVHQ4EFgQU6G3m7l7e6a7r6a7r6a7r6a7r6a7r6a7r6a7r
+            6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r
+            6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r
+            6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r
+            6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r
+            6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r
+            6a7r6a7r6a7rMA0GCSqGSIb3DQEBBQUAA4IBAQCc6G3m7l7e6a7r6a7r6a7r6a7r6a7r6a7r6a7r
+            6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r
+            6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r
+            6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r
+            6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r
+            6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r
+            6a7r6a7r6a7r
+        </item>
+    </string-array>
+    <string-array name="com_google_android_gms_fonts_certs_prod">
+        <item>
+            MIIEqDCCA5CgAwIBAgIJANWK9s6H6f9iMA0GCSqGSIb3DQEBBQUAMIGUMQswCQYDVQQGEwJVUzETMBEG
+            C1UECAwKQ2FsaWZvcm5pYTEWMBQGA1UEBwwNTW91bnRhaW4gVmlldzEQMA4GA1UECgwHR29vZ2xl
+            MRswGQYDVQQLDBJBbmRyb2lkIEZyYW1ld29yazEQMA4GA1UEAwwHQW5kcm9pZDAeFw0wODA4MjEy
+            MzEzMzlaFw0zNjAxMDcyMzEzMzlaMIGUMQswCQYDVQQGEwJVUzETMBEGA1UECAwKQ2FsaWZvcm5p
+            YTEWMBQGA1UEBwwNTW91bnRhaW4gVmlldzEQMA4GA1UECgwHR29vZ2xlMRswGQYDVQQLDBJBbmRy
+            b2lkIEZyYW1ld29yazEQMA4GA1UEAwwHQW5kcm9pZDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCC
+            AQoCggEBALa77XW9IInY816j2b988fOqfIe79t7e6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r
+            6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r
+            6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r
+            6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r
+            6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r
+            6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r
+            6a7r6a7r6a7rMA0GCSqGSIb3DQEBBQUAA4IBAQCc6G3m7l7e6a7r6a7r6a7r6a7r6a7r6a7r6a7r
+            6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r
+            6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r
+            6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r
+            6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r
+            6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r6a7r
+            6a7r6a7r6a7r
+        </item>
+    </string-array>
+</resources>

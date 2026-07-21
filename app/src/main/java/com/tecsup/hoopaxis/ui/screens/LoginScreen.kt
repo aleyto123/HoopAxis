@@ -1,13 +1,17 @@
 package com.tecsup.hoopaxis.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
@@ -15,30 +19,30 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RadialGradientShader
-import androidx.compose.ui.graphics.Shader
-import androidx.compose.ui.graphics.ShaderBrush
-import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.tecsup.hoopaxis.HoopAxisApplication
 import com.tecsup.hoopaxis.R
-import com.tecsup.hoopaxis.ui.components.GlassmorphicCard
+import com.tecsup.hoopaxis.ui.components.GlassCard
 import com.tecsup.hoopaxis.ui.theme.*
 import com.tecsup.hoopaxis.viewmodel.AuthViewModel
 
+@Suppress("UNCHECKED_CAST")
 @Composable
 fun LoginScreen(
     onNavigateToDashboard: () -> Unit = {},
@@ -47,8 +51,8 @@ fun LoginScreen(
     val context = LocalContext.current
     val repository = (context.applicationContext as HoopAxisApplication).repository
     val viewModel: AuthViewModel = viewModel(
-        factory = object : androidx.lifecycle.ViewModelProvider.Factory {
-            override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+        factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 return AuthViewModel(repository) as T
             }
         }
@@ -59,54 +63,49 @@ fun LoginScreen(
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var name by remember { mutableStateOf("Árbitro") } // Default name for signup
+    var name by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
-    var selectedTab by remember { mutableStateOf(0) } // 0: Login, 1: Register
+    var selectedTab by remember { mutableIntStateOf(0) } // 0: Login, 1: Register
 
-    // Google Sign In Configuration
-    val gso = remember {
+    val clientId = stringResource(R.string.default_web_client_id)
+    val gso = remember(clientId) {
         GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(context.getString(R.string.default_web_client_id))
+            .requestIdToken(clientId)
             .requestEmail()
             .build()
     }
-    val googleSignInClient = remember { GoogleSignIn.getClient(context, gso) }
+    val googleSignInClient = remember(gso) { GoogleSignIn.getClient(context, gso) }
 
     val launcher = androidx.activity.compose.rememberLauncherForActivityResult(
         contract = androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult()
     ) { result ->
         val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
         try {
-            val account = task.getResult(ApiException::class.java)!!
-            viewModel.signInWithGoogle(account.idToken!!, onNavigateToDashboard)
+            val account = task.getResult(ApiException::class.java)
+            account?.idToken?.let { token ->
+                viewModel.signInWithGoogle(token, onNavigateToDashboard)
+            } ?: run {
+                viewModel.updateError("Error: No se pudo obtener el token de Google.")
+            }
         } catch (e: ApiException) {
-            // Manejar error si es necesario
-        }
-    }
-
-    val radialGlow = object : ShaderBrush() {
-        override fun createShader(size: androidx.compose.ui.geometry.Size): Shader {
-            return RadialGradientShader(
-                center = androidx.compose.ui.geometry.Offset(size.width / 2f, size.height * 0.3f),
-                radius = size.width * 1.5f,
-                colors = listOf(BackgroundGlow, BackgroundBase),
-                colorStops = listOf(0f, 1f),
-                tileMode = TileMode.Clamp
-            )
+            viewModel.updateError("Error de Google (${e.statusCode}): Inténtalo de nuevo.")
         }
     }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(radialGlow)
-            .padding(24.dp),
-        contentAlignment = Alignment.Center
+            .padding(horizontal = 24.dp),
+        contentAlignment = Alignment.TopCenter
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
         ) {
+            Spacer(modifier = Modifier.height(60.dp))
+
             // Logo
             Box(
                 modifier = Modifier
@@ -114,7 +113,7 @@ fun LoginScreen(
                     .clip(RoundedCornerShape(24.dp))
                     .background(
                         Brush.verticalGradient(
-                            listOf(Color(0xFFFF8EC5), Color(0xFFFF56A5))
+                            listOf(AppColors.Purple, AppColors.Pink)
                         )
                     ),
                 contentAlignment = Alignment.Center
@@ -126,26 +125,32 @@ fun LoginScreen(
 
             Text(
                 text = "FIBA 2026",
-                color = Color.White,
-                fontSize = 32.sp,
-                fontWeight = FontWeight.Black,
-                letterSpacing = 2.sp
+                style = MaterialTheme.typography.displayLarge
             )
             Text(
                 text = "Reglamento Oficial · Plataforma Educativa",
-                color = Color.White.copy(alpha = 0.6f),
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium
+                style = MaterialTheme.typography.bodyMedium
             )
 
-            Spacer(modifier = Modifier.height(48.dp))
+            Spacer(modifier = Modifier.height(40.dp))
 
-            GlassmorphicCard(
-                modifier = Modifier.fillMaxWidth(),
-                cornerRadius = 32.dp,
-                backgroundAlpha = 0.1f
+            // Glass Card
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(
+                        Brush.linearGradient(
+                            colors = listOf(
+                                Color.White.copy(alpha = 0.10f),
+                                Color.White.copy(alpha = 0.05f)
+                            )
+                        )
+                    )
+                    .border(BorderStroke(1.dp, Color.White.copy(alpha = 0.18f)), RoundedCornerShape(24.dp))
+                    .padding(8.dp)
             ) {
-                Column(modifier = Modifier.padding(8.dp)) {
+                Column {
                     // Custom Tabs
                     Row(
                         modifier = Modifier
@@ -165,7 +170,16 @@ fun LoginScreen(
                         )
                     }
 
-                    // Email Field
+                    if (selectedTab == 1) {
+                        AuthTextField(
+                            value = name,
+                            onValueChange = { name = it },
+                            placeholder = "Tu nombre",
+                            leadingIcon = Icons.Default.Person
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
+
                     AuthTextField(
                         value = email,
                         onValueChange = { email = it },
@@ -175,7 +189,6 @@ fun LoginScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Password Field
                     AuthTextField(
                         value = password,
                         onValueChange = { password = it },
@@ -191,42 +204,43 @@ fun LoginScreen(
                     if (error != null) {
                         Text(
                             text = error!!,
-                            color = Color.Red,
+                            color = AppColors.Red,
                             fontSize = 12.sp,
-                            modifier = Modifier.padding(bottom = 8.dp)
+                            modifier = Modifier.padding(bottom = 8.dp),
+                            lineHeight = 16.sp
                         )
                     }
 
-                    // Login/Register Button
-                    Button(
-                        onClick = {
-                            if (selectedTab == 0) {
-                                viewModel.signIn(email, password, onNavigateToDashboard)
-                            } else {
-                                viewModel.signUp(email, password, name, onNavigateToDashboard)
-                            }
-                        },
-                        enabled = !isLoading && email.isNotEmpty() && password.isNotEmpty(),
+                    // Primary Gradient Button
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp)
-                            .clip(RoundedCornerShape(16.dp))
+                            .clip(RoundedCornerShape(20.dp))
                             .background(
-                                Brush.horizontalGradient(
-                                    listOf(Color(0xFFC471ED), Color(0xFFF64F59))
+                                Brush.linearGradient(
+                                    colors = listOf(AppColors.Purple, AppColors.Pink),
+                                    start = Offset(0f, 0f),
+                                    end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY)
                                 )
-                            ),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-                        contentPadding = PaddingValues(0.dp)
+                            )
+                            .clickable(enabled = !isLoading && email.isNotEmpty() && password.isNotEmpty()) {
+                                if (selectedTab == 0) {
+                                    viewModel.signIn(email, password, onNavigateToDashboard)
+                                } else {
+                                    viewModel.signUp(email, password, name, onNavigateToDashboard)
+                                }
+                            },
+                        contentAlignment = Alignment.Center
                     ) {
                         if (isLoading) {
                             CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
                         } else {
                             Text(
-                                text = if (selectedTab == 0) "Ingresar" else "Registrarse",
+                                text = if (selectedTab == 0) "Ingresar" else "Crear cuenta gratuita",
                                 color = Color.White,
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Black
+                                fontWeight = FontWeight.Black,
+                                fontSize = 18.sp
                             )
                         }
                     }
@@ -235,37 +249,28 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Quick Access
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Divider(modifier = Modifier.weight(1f), color = Color.White.copy(alpha = 0.1f))
+                HorizontalDivider(modifier = Modifier.weight(1f), color = Color.White.copy(alpha = 0.1f))
                 Text(
                     text = " acceso rápido ",
-                    color = Color.White.copy(alpha = 0.3f),
-                    fontSize = 12.sp,
+                    style = MaterialTheme.typography.labelSmall,
                     modifier = Modifier.padding(horizontal = 8.dp)
                 )
-                Divider(modifier = Modifier.weight(1f), color = Color.White.copy(alpha = 0.1f))
+                HorizontalDivider(modifier = Modifier.weight(1f), color = Color.White.copy(alpha = 0.1f))
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Row(modifier = Modifier.fillMaxWidth()) {
-                SocialButton(
-                    text = "Google",
-                    icon = "G",
-                    modifier = Modifier.weight(1f),
-                    onClick = {
-                        launcher.launch(googleSignInClient.signInIntent)
-                    }
-                )
-                Spacer(modifier = Modifier.width(16.dp))
-                SocialButton(
-                    text = "Apple",
-                    icon = "A",
-                    modifier = Modifier.weight(1f),
-                    onClick = {}
-                )
-            }
+            SocialButton(
+                text = "Google",
+                icon = "G",
+                modifier = Modifier.fillMaxWidth(),
+                onClick = {
+                    launcher.launch(googleSignInClient.signInIntent)
+                }
+            )
+            
+            Spacer(modifier = Modifier.height(40.dp))
         }
     }
 }
@@ -275,7 +280,7 @@ fun TabItem(text: String, isSelected: Boolean, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(16.dp))
-            .background(if (isSelected) Color(0xFFFF56A5).copy(alpha = 0.8f) else Color.Transparent)
+            .background(if (isSelected) AppColors.Pink.copy(alpha = 0.8f) else Color.Transparent)
             .clickable { onClick() }
             .padding(horizontal = 24.dp, vertical = 12.dp)
     ) {
@@ -318,15 +323,15 @@ fun AuthTextField(
             }
         },
         visualTransformation = if (isPassword && !passwordVisible) PasswordVisualTransformation() else VisualTransformation.None,
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = OutlinedTextFieldDefaults.colors(
-            unfocusedContainerColor = Color.White.copy(alpha = 0.05f),
-            focusedContainerColor = Color.White.copy(alpha = 0.1f),
-            unfocusedBorderColor = Color.White.copy(alpha = 0.2f),
-            focusedBorderColor = Color(0xFFC471ED),
-            cursorColor = Color.White,
+            focusedBorderColor = AppColors.Purple,
+            unfocusedBorderColor = Color.White.copy(alpha = 0.22f),
             focusedTextColor = Color.White,
-            unfocusedTextColor = Color.White
+            unfocusedTextColor = Color.White,
+            cursorColor = AppColors.Purple,
+            focusedContainerColor = Color.White.copy(0.08f),
+            unfocusedContainerColor = Color.White.copy(0.06f),
         ),
         singleLine = true
     )
@@ -348,13 +353,5 @@ fun SocialButton(text: String, icon: String, modifier: Modifier = Modifier, onCl
             Spacer(modifier = Modifier.width(8.dp))
             Text(text = text, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 15.sp)
         }
-    }
-}
-
-@Preview
-@Composable
-fun LoginPreview() {
-    HoopAxisTheme {
-        LoginScreen()
     }
 }

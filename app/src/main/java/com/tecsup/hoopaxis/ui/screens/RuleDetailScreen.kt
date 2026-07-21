@@ -6,17 +6,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import com.tecsup.hoopaxis.ui.theme.Background
+import androidx.compose.ui.unit.dp
+import com.tecsup.hoopaxis.ui.theme.AppColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RuleDetailScreen(ruleId: Int, onBack: () -> Unit) {
     Scaffold(
-        containerColor = Background,
+        containerColor = Color.Transparent,
         topBar = {
             TopAppBar(
                 title = { Text("Regla #$ruleId", color = Color.White) },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Background)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = AppColors.Background)
             )
         }
     ) { padding ->
@@ -25,7 +26,8 @@ fun RuleDetailScreen(ruleId: Int, onBack: () -> Unit) {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("Detalle de la Regla ID: $ruleId", color = Color.White)
+            Text("Detalle de la Regla ID: $ruleId", style = MaterialTheme.typography.bodyLarge, color = Color.White)
+            Spacer(modifier = Modifier.height(24.dp))
             Button(onClick = onBack) {
                 Text("Volver")
             }

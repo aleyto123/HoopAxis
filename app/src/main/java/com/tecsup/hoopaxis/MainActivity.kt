@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.view.WindowCompat
 import androidx.navigation.compose.rememberNavController
 import com.tecsup.hoopaxis.ui.navigation.HoopAxisNavGraph
 import com.tecsup.hoopaxis.ui.screens.DashboardScreen
@@ -14,6 +15,7 @@ import com.tecsup.hoopaxis.ui.theme.HoopAxisTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         enableEdgeToEdge()
         setContent {
             HoopAxisTheme {

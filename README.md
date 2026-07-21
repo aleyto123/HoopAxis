@@ -47,5 +47,14 @@ El proyecto está construido bajo las mejores prácticas de desarrollo moderno e
 
 La aplicación utiliza un sistema de **"Destructive Migration"** en Room durante la fase de desarrollo para facilitar cambios rápidos en el esquema de datos. La interfaz implementa `GlassmorphicCard`, un componente personalizado que utiliza transparencias y desenfoques para lograr una estética moderna.
 
+## 🛡 Manejo de Errores y Seguridad
+
+La aplicación implementa un sistema robusto de retroalimentación al usuario mediante `AuthViewModel`, capturando excepciones específicas de Firebase y transformándolas en mensajes amigables:
+
+- **Conectividad:** Detección de falta de internet (`FirebaseNetworkException`) con aviso de reintentar conexión.
+- **Validación de Acceso:** Mensajes claros para credenciales incorrectas, correos no registrados o formatos de email inválidos.
+- **Seguridad de Registro:** Control de contraseñas débiles (mínimo 6 caracteres) y detección de cuentas duplicadas.
+- **Validación Local:** Verificación de campos obligatorios antes de realizar peticiones al servidor para optimizar el tráfico de datos.
+
 ---
 *Desarrollado con ❤️ para la comunidad del baloncesto.*

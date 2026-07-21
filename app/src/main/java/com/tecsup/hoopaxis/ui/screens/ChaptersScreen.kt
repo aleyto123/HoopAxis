@@ -1,6 +1,5 @@
 package com.tecsup.hoopaxis.ui.screens
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -20,14 +19,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RadialGradientShader
-import androidx.compose.ui.graphics.Shader
-import androidx.compose.ui.graphics.ShaderBrush
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.TileMode
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -36,7 +28,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.tecsup.hoopaxis.HoopAxisApplication
 import com.tecsup.hoopaxis.data.model.Chapter
 import com.tecsup.hoopaxis.ui.components.BottomNavBar
-import com.tecsup.hoopaxis.ui.components.GlassmorphicCard
+import com.tecsup.hoopaxis.ui.components.CircularProgress
+import com.tecsup.hoopaxis.ui.components.GlassCard
 import com.tecsup.hoopaxis.ui.theme.*
 import com.tecsup.hoopaxis.viewmodel.DashboardViewModel
 
@@ -56,18 +49,6 @@ fun ChaptersScreen(
     
     val uiState by viewModel.uiState.collectAsState()
 
-    val radialGlow = object : ShaderBrush() {
-        override fun createShader(size: androidx.compose.ui.geometry.Size): Shader {
-            return RadialGradientShader(
-                center = androidx.compose.ui.geometry.Offset(size.width / 2f, size.height * 0.15f),
-                radius = size.width * 1.5f,
-                colors = listOf(BackgroundGlow, BackgroundBase),
-                colorStops = listOf(0f, 1f),
-                tileMode = TileMode.Clamp
-            )
-        }
-    }
-
     Scaffold(
         bottomBar = { 
             BottomNavBar(
@@ -77,119 +58,90 @@ fun ChaptersScreen(
                 onChaptersClick = onNavigateToChapters,
                 onProfileClick = onNavigateToProfile
             ) 
-        }
+        },
+        containerColor = Color.Transparent
     ) { paddingValues ->
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(radialGlow)
                 .padding(paddingValues)
+                .padding(horizontal = 20.dp)
+                .verticalScroll(rememberScrollState())
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 20.dp)
-                    .verticalScroll(rememberScrollState())
-            ) {
-                Spacer(modifier = Modifier.height(32.dp))
-                
-                Text(
-                    text = "NIVEL 2 — TODOS LOS MÓDULOS",
-                    color = Color.White.copy(alpha = 0.5f),
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Black,
-                    letterSpacing = 1.sp
-                )
-                
-                Text(
-                    text = "${uiState.allChapters.size} Capítulos",
-                    color = Color.White,
-                    fontSize = 34.sp,
-                    fontWeight = FontWeight.Black
-                )
-                
-                Text(
-                    text = "Biblioteca completa del Reglamento FIBA 2026",
-                    color = Color.White.copy(alpha = 0.6f),
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Medium
-                )
+            Spacer(modifier = Modifier.height(32.dp))
+            
+            Text(
+                text = "NIVEL 2 — TODOS LOS MÓDULOS",
+                style = MaterialTheme.typography.labelSmall,
+                color = AppColors.TextSecondary,
+                letterSpacing = 1.sp
+            )
+            
+            Text(
+                text = "${uiState.allChapters.size} Capítulos",
+                style = MaterialTheme.typography.displayLarge
+            )
+            
+            Text(
+                text = "Biblioteca completa del Reglamento FIBA 2026",
+                style = MaterialTheme.typography.bodyMedium
+            )
 
-                Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-                uiState.allChapters.forEach { chapter ->
-                    ChapterCard(
-                        chapter = chapter,
-                        onClick = { if (!chapter.isLocked) onNavigateToDetail(chapter.id) }
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
-                
-                PublicityBanner()
-                Spacer(modifier = Modifier.height(32.dp))
+            uiState.allChapters.forEach { chapter ->
+                ChapterCard(
+                    chapter = chapter,
+                    onClick = { if (!chapter.isLocked) onNavigateToDetail(chapter.id) }
+                )
+                Spacer(modifier = Modifier.height(16.dp))
             }
+            
+            PublicityBanner()
+            Spacer(modifier = Modifier.height(32.dp))
         }
     }
 }
 
 @Composable
 fun ChapterCard(chapter: Chapter, onClick: () -> Unit) {
-    val tagColor = Color(android.graphics.Color.parseColor(chapter.tagColorHex))
+    val color = when(chapter.ruleId % 4) {
+        0 -> AppColors.Purple
+        1 -> AppColors.Pink
+        2 -> AppColors.Blue
+        else -> AppColors.Gold
+    }
     
-    GlassmorphicCard(
+    GlassCard(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() },
-        cornerRadius = 28.dp,
-        backgroundAlpha = 0.06f
+        categoryColor = color
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Estado de progreso (Check o Círculo)
+            // Estado de progreso
             Box(contentAlignment = Alignment.Center, modifier = Modifier.size(52.dp)) {
                 if (chapter.progress >= 1.0f) {
                     Box(
                         modifier = Modifier
                             .size(48.dp)
                             .clip(CircleShape)
-                            .background(tagColor.copy(alpha = 0.2f))
-                            .border(2.dp, tagColor, CircleShape),
+                            .background(color.copy(alpha = 0.18f))
+                            .border(1.dp, color.copy(alpha = 0.4f), CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Default.Check,
                             contentDescription = null,
-                            tint = tagColor,
+                            tint = color,
                             modifier = Modifier.size(24.dp)
                         )
                     }
                 } else {
-                    Canvas(modifier = Modifier.fillMaxSize()) {
-                        drawArc(
-                            color = Color.White.copy(alpha = 0.08f),
-                            startAngle = -90f,
-                            sweepAngle = 360f,
-                            useCenter = false,
-                            style = Stroke(width = 5.dp.toPx(), cap = StrokeCap.Round)
-                        )
-                        drawArc(
-                            brush = Brush.sweepGradient(
-                                colors = listOf(ProgressCyan, ProgressPurple, ProgressBlue, ProgressCyan)
-                            ),
-                            startAngle = -90f,
-                            sweepAngle = 360f * chapter.progress,
-                            useCenter = false,
-                            style = Stroke(width = 5.dp.toPx(), cap = StrokeCap.Round)
-                        )
-                    }
-                    Text(
-                        text = "${(chapter.progress * 100).toInt()}%",
-                        color = Color.White,
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Black
-                    )
+                    CircularProgress(progress = chapter.progress, categoryColor = color, size = 52.dp)
                 }
             }
 
@@ -197,16 +149,15 @@ fun ChapterCard(chapter: Chapter, onClick: () -> Unit) {
 
             Column(modifier = Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    // Etiqueta R1-C1
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(6.dp))
-                            .background(tagColor.copy(alpha = 0.15f))
+                            .background(color.copy(alpha = 0.18f))
                             .padding(horizontal = 6.dp, vertical = 2.dp)
                     ) {
                         Text(
                             text = "R${chapter.ruleId}-C${chapter.chapterNumber}",
-                            color = tagColor,
+                            color = color,
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Black
                         )
@@ -216,7 +167,7 @@ fun ChapterCard(chapter: Chapter, onClick: () -> Unit) {
                         Icon(
                             imageVector = Icons.Default.Lock,
                             contentDescription = null,
-                            tint = Color.White.copy(alpha = 0.4f),
+                            tint = AppColors.TextMuted,
                             modifier = Modifier.size(12.dp)
                         )
                     }
@@ -224,22 +175,19 @@ fun ChapterCard(chapter: Chapter, onClick: () -> Unit) {
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = chapter.title,
-                    color = Color.White,
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.Black
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = Color.White
                 )
                 Text(
                     text = "${chapter.categoryName} · ${chapter.lessonsCount} lecciones",
-                    color = Color.White.copy(alpha = 0.5f),
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Medium
+                    style = MaterialTheme.typography.bodyMedium
                 )
             }
 
             Icon(
                 imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
                 contentDescription = null,
-                tint = Color.White.copy(alpha = 0.3f),
+                tint = AppColors.TextMuted,
                 modifier = Modifier.size(20.dp)
             )
         }
