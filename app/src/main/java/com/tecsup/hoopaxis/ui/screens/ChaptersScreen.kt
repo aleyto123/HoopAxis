@@ -11,11 +11,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,11 +32,13 @@ import com.tecsup.hoopaxis.viewmodel.DashboardViewModel
 
 @Composable
 fun ChaptersScreen(
-    onNavigateToDetail: (Int) -> Unit = {},
+    ruleId: String?,
+    onNavigateToDetail: (String, String, String) -> Unit = { _, _, _ -> },
     onNavigateToHome: () -> Unit = {},
     onNavigateToRules: () -> Unit = {},
     onNavigateToChapters: () -> Unit = {},
-    onNavigateToProfile: () -> Unit = {}
+    onNavigateToProfile: () -> Unit = {},
+    onBack: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val repository = (context.applicationContext as HoopAxisApplication).repository
@@ -48,6 +47,14 @@ fun ChaptersScreen(
     )
     
     val uiState by viewModel.uiState.collectAsState()
+    val chapters by viewModel.chapters.collectAsState()
+    
+    val rule = uiState.rules.find { it.id == ruleId }
+    val ruleColor = Color(android.graphics.Color.parseColor(rule?.color ?: "#C96BFF"))
+
+    LaunchedEffect(ruleId) {
+        ruleId?.let { viewModel.selectRule(it) }
+    }
 
     Scaffold(
         bottomBar = { 
@@ -70,29 +77,30 @@ fun ChaptersScreen(
         ) {
             Spacer(modifier = Modifier.height(32.dp))
             
-            Text(
-                text = "NIVEL 2 — TODOS LOS MÓDULOS",
-                style = MaterialTheme.typography.labelSmall,
-                color = AppColors.TextSecondary,
-                letterSpacing = 1.sp
-            )
-            
-            Text(
-                text = "${uiState.allChapters.size} Capítulos",
-                style = MaterialTheme.typography.displayLarge
-            )
-            
-            Text(
-                text = "Biblioteca completa del Reglamento FIBA 2026",
-                style = MaterialTheme.typography.bodyMedium
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column {
+                    Text(
+                        text = if (ruleId == "all" || ruleId == null) "NIVEL 2 — TODOS LOS MÓDULOS" else "NIVEL 2 — REGLA ${rule?.number ?: ""}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = AppColors.TextSecondary,
+                        letterSpacing = 1.sp
+                    )
+                    Text(
+                        text = if (ruleId == "all" || ruleId == null) "${chapters.size} Capítulos" else rule?.title ?: "Capítulos",
+                        style = MaterialTheme.typography.displayLarge
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            uiState.allChapters.forEach { chapter ->
+            chapters.forEach { chapter ->
                 ChapterCard(
                     chapter = chapter,
-                    onClick = { if (!chapter.isLocked) onNavigateToDetail(chapter.id) }
+                    ruleColor = ruleColor,
+                    onClick = { 
+                        onNavigateToDetail(chapter.id, chapter.title, rule?.color?.removePrefix("#") ?: "C96BFF")
+                    }
                 )
                 Spacer(modifier = Modifier.height(16.dp))
             }
@@ -104,19 +112,12 @@ fun ChaptersScreen(
 }
 
 @Composable
-fun ChapterCard(chapter: Chapter, onClick: () -> Unit) {
-    val color = when(chapter.ruleId % 4) {
-        0 -> AppColors.Purple
-        1 -> AppColors.Pink
-        2 -> AppColors.Blue
-        else -> AppColors.Gold
-    }
-    
+fun ChapterCard(chapter: Chapter, ruleColor: Color, onClick: () -> Unit) {
     GlassCard(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() },
-        categoryColor = color
+        categoryColor = ruleColor
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -129,19 +130,19 @@ fun ChapterCard(chapter: Chapter, onClick: () -> Unit) {
                         modifier = Modifier
                             .size(48.dp)
                             .clip(CircleShape)
-                            .background(color.copy(alpha = 0.18f))
-                            .border(1.dp, color.copy(alpha = 0.4f), CircleShape),
+                            .background(ruleColor.copy(alpha = 0.18f))
+                            .border(1.dp, ruleColor.copy(alpha = 0.4f), CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Default.Check,
                             contentDescription = null,
-                            tint = color,
+                            tint = ruleColor,
                             modifier = Modifier.size(24.dp)
                         )
                     }
                 } else {
-                    CircularProgress(progress = chapter.progress, categoryColor = color, size = 52.dp)
+                    CircularProgress(progress = chapter.progress, categoryColor = ruleColor, size = 52.dp)
                 }
             }
 
@@ -152,34 +153,25 @@ fun ChapterCard(chapter: Chapter, onClick: () -> Unit) {
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(6.dp))
-                            .background(color.copy(alpha = 0.18f))
+                            .background(ruleColor.copy(alpha = 0.18f))
                             .padding(horizontal = 6.dp, vertical = 2.dp)
                     ) {
                         Text(
-                            text = "R${chapter.ruleId}-C${chapter.chapterNumber}",
-                            color = color,
+                            text = "Cap. ${chapter.number}",
+                            color = ruleColor,
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Black
-                        )
-                    }
-                    if (chapter.isLocked) {
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Icon(
-                            imageVector = Icons.Default.Lock,
-                            contentDescription = null,
-                            tint = AppColors.TextMuted,
-                            modifier = Modifier.size(12.dp)
                         )
                     }
                 }
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = chapter.title,
+                    text = "${chapter.emoji} ${chapter.title}",
                     style = MaterialTheme.typography.bodyLarge,
                     color = Color.White
                 )
                 Text(
-                    text = "${chapter.categoryName} · ${chapter.lessonsCount} lecciones",
+                    text = "${chapter.articlesCount} artículos",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }

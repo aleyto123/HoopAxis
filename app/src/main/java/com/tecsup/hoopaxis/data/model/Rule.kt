@@ -3,13 +3,15 @@ package com.tecsup.hoopaxis.data.model
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "capitulos")
-data class Chapter(
+@Entity(tableName = "reglas")
+data class Rule(
     @PrimaryKey val id: String,
-    val ruleId: String,
     val number: Int,
     val title: String,
+    val subtitle: String,
     val emoji: String,
-    val articlesCount: Int = 0,
+    val color: String,
+    val glow: String,
+    val chaptersCount: Int = 2,
     val progress: Float = 0f
 )

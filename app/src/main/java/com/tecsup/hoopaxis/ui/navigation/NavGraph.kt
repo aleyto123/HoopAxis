@@ -19,11 +19,26 @@ sealed class Screen(val route: String) {
     object Login : Screen("login")
     object Dashboard : Screen("dashboard")
     object Rules : Screen("rules")
-    object Chapters : Screen("chapters")
+    object Chapters : Screen("chapters/{ruleId}") {
+        fun createRoute(ruleId: String) = "chapters/$ruleId"
+    }
     object Profile : Screen("profile")
     object RuleDetail : Screen("rule_detail/{ruleId}") {
-        fun createRoute(ruleId: Int) = "rule_detail/$ruleId"
+        fun createRoute(ruleId: String) = "rule_detail/$ruleId"
     }
+    object LessonList : Screen("lesson_list/{chapterId}/{chapterTitle}/{ruleColor}") {
+        fun createRoute(chapterId: String, chapterTitle: String, ruleColor: String) = 
+            "lesson_list/$chapterId/$chapterTitle/$ruleColor"
+    }
+    object Lesson : Screen("lesson/{lessonId}/{ruleColor}") {
+        fun createRoute(lessonId: String, ruleColor: String) = "lesson/$lessonId/$ruleColor"
+    }
+    object Quiz : Screen("quiz")
+    object QuizResults : Screen("quiz_results/{score}/{total}") {
+        fun createRoute(score: Int, total: Int) = "quiz_results/$score/$total"
+    }
+    object Pro : Screen("pro_screen")
+    object PaymentSuccess : Screen("payment_success")
 }
 
 @Composable
@@ -37,14 +52,12 @@ fun HoopAxisNavGraph(navController: NavHostController) {
         startDestination = Screen.Splash.route
     ) {
         composable(Screen.Splash.route) {
-            // Pantalla de carga silenciosa que verifica la persistencia
             LaunchedEffect(user) {
                 if (user != null && user?.isLoggedIn == true) {
                     navController.navigate(Screen.Dashboard.route) {
                         popUpTo(Screen.Splash.route) { inclusive = true }
                     }
                 } else {
-                    // Solo navegamos a Login si estamos seguros de que no hay usuario (tras un breve delay o carga)
                     navController.navigate(Screen.Login.route) {
                         popUpTo(Screen.Splash.route) { inclusive = true }
                     }
@@ -63,7 +76,7 @@ fun HoopAxisNavGraph(navController: NavHostController) {
         composable(Screen.Dashboard.route) {
             DashboardScreen(
                 onNavigateToDetail = { ruleId ->
-                    navController.navigate(Screen.RuleDetail.createRoute(ruleId))
+                    navController.navigate(Screen.Chapters.createRoute(ruleId))
                 },
                 onNavigateToHome = {
                     navController.navigate(Screen.Dashboard.route) {
@@ -74,7 +87,8 @@ fun HoopAxisNavGraph(navController: NavHostController) {
                     navController.navigate(Screen.Rules.route)
                 },
                 onNavigateToChapters = {
-                    navController.navigate(Screen.Chapters.route)
+                    // For global chapters view, we might need a default or another screen
+                    navController.navigate(Screen.Chapters.createRoute("all")) 
                 },
                 onNavigateToProfile = {
                     navController.navigate(Screen.Profile.route)
@@ -84,7 +98,7 @@ fun HoopAxisNavGraph(navController: NavHostController) {
         composable(Screen.Rules.route) {
             RulesScreen(
                 onNavigateToDetail = { ruleId ->
-                    navController.navigate(Screen.RuleDetail.createRoute(ruleId))
+                    navController.navigate(Screen.Chapters.createRoute(ruleId))
                 },
                 onNavigateToHome = {
                     navController.navigate(Screen.Dashboard.route) {
@@ -97,17 +111,19 @@ fun HoopAxisNavGraph(navController: NavHostController) {
                     }
                 },
                 onNavigateToChapters = {
-                    navController.navigate(Screen.Chapters.route)
+                    navController.navigate(Screen.Chapters.createRoute("all"))
                 },
                 onNavigateToProfile = {
                     navController.navigate(Screen.Profile.route)
                 }
             )
         }
-        composable(Screen.Chapters.route) {
+        composable(Screen.Chapters.route) { backStackEntry ->
+            val ruleId = backStackEntry.arguments?.getString("ruleId")
             ChaptersScreen(
-                onNavigateToDetail = { ruleId ->
-                    navController.navigate(Screen.RuleDetail.createRoute(ruleId))
+                ruleId = ruleId,
+                onNavigateToDetail = { chapterId, title, color ->
+                    navController.navigate(Screen.LessonList.createRoute(chapterId, title, color))
                 },
                 onNavigateToHome = {
                     navController.navigate(Screen.Dashboard.route) {
@@ -118,13 +134,14 @@ fun HoopAxisNavGraph(navController: NavHostController) {
                     navController.navigate(Screen.Rules.route)
                 },
                 onNavigateToChapters = {
-                    navController.navigate(Screen.Chapters.route) {
+                    navController.navigate(Screen.Chapters.createRoute("all")) {
                         popUpTo(Screen.Chapters.route) { inclusive = true }
                     }
                 },
                 onNavigateToProfile = {
                     navController.navigate(Screen.Profile.route)
-                }
+                },
+                onBack = { navController.popBackStack() }
             )
         }
         composable(Screen.Profile.route) {
@@ -149,13 +166,44 @@ fun HoopAxisNavGraph(navController: NavHostController) {
         }
         composable(
             route = Screen.RuleDetail.route,
-            arguments = listOf(navArgument("ruleId") { type = NavType.IntType })
+            arguments = listOf(navArgument("ruleId") { type = NavType.StringType })
         ) { backStackEntry ->
-            val ruleId = backStackEntry.arguments?.getInt("ruleId") ?: 0
+            val ruleId = backStackEntry.arguments?.getString("ruleId") ?: ""
             RuleDetailScreen(
                 ruleId = ruleId,
                 onBack = { navController.popBackStack() }
             )
+        }
+        
+        composable(Screen.LessonList.route) { backStackEntry ->
+            val chapterId = backStackEntry.arguments?.getString("chapterId")
+            val chapterTitle = backStackEntry.arguments?.getString("chapterTitle")
+            val ruleColor = backStackEntry.arguments?.getString("ruleColor")
+            com.tecsup.hoopaxis.ui.screens.LessonListScreen(navController, chapterId, chapterTitle, ruleColor)
+        }
+        
+        composable(Screen.Lesson.route) { backStackEntry ->
+            val lessonId = backStackEntry.arguments?.getString("lessonId")
+            val ruleColor = backStackEntry.arguments?.getString("ruleColor")
+            com.tecsup.hoopaxis.ui.screens.LessonScreen(navController, lessonId, ruleColor)
+        }
+        
+        composable(Screen.Quiz.route) {
+            com.tecsup.hoopaxis.ui.screens.QuizScreen(navController)
+        }
+        
+        composable(Screen.QuizResults.route) { backStackEntry ->
+            val score = backStackEntry.arguments?.getString("score")
+            val total = backStackEntry.arguments?.getString("total")
+            com.tecsup.hoopaxis.ui.screens.QuizResultsScreen(navController, score, total)
+        }
+        
+        composable(Screen.Pro.route) {
+            com.tecsup.hoopaxis.ui.screens.ProScreen(navController)
+        }
+        
+        composable(Screen.PaymentSuccess.route) {
+            com.tecsup.hoopaxis.ui.screens.PaymentSuccessScreen(navController)
         }
     }
 }

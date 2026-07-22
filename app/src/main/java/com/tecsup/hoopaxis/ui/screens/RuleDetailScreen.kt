@@ -11,7 +11,7 @@ import com.tecsup.hoopaxis.ui.theme.AppColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RuleDetailScreen(ruleId: Int, onBack: () -> Unit) {
+fun RuleDetailScreen(ruleId: String, onBack: () -> Unit) {
     Scaffold(
         containerColor = Color.Transparent,
         topBar = {

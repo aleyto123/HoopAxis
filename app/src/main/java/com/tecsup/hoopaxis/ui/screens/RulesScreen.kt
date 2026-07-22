@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.tecsup.hoopaxis.HoopAxisApplication
-import com.tecsup.hoopaxis.data.model.RuleCategory
+import com.tecsup.hoopaxis.data.model.Rule
 import com.tecsup.hoopaxis.ui.components.BottomNavBar
 import com.tecsup.hoopaxis.ui.components.CircularProgress
 import com.tecsup.hoopaxis.ui.components.GlassCard
@@ -30,7 +30,7 @@ import com.tecsup.hoopaxis.viewmodel.DashboardViewModel
 
 @Composable
 fun RulesScreen(
-    onNavigateToDetail: (Int) -> Unit = {},
+    onNavigateToDetail: (String) -> Unit = {},
     onNavigateToHome: () -> Unit = {},
     onNavigateToRules: () -> Unit = {},
     onNavigateToChapters: () -> Unit = {},
@@ -84,10 +84,10 @@ fun RulesScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            uiState.categories.forEach { category ->
+            uiState.rules.forEach { rule ->
                 RuleVerticalCard(
-                    category = category,
-                    onClick = { onNavigateToDetail(category.id) }
+                    rule = rule,
+                    onClick = { onNavigateToDetail(rule.id) }
                 )
                 Spacer(modifier = Modifier.height(16.dp))
             }
@@ -99,13 +99,8 @@ fun RulesScreen(
 }
 
 @Composable
-fun RuleVerticalCard(category: RuleCategory, onClick: () -> Unit) {
-    val color = when(category.id % 4) {
-        0 -> AppColors.Purple
-        1 -> AppColors.Pink
-        2 -> AppColors.Blue
-        else -> AppColors.Gold
-    }
+fun RuleVerticalCard(rule: Rule, onClick: () -> Unit) {
+    val color = Color(android.graphics.Color.parseColor(rule.color))
     
     GlassCard(
         modifier = Modifier
@@ -126,7 +121,7 @@ fun RuleVerticalCard(category: RuleCategory, onClick: () -> Unit) {
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "R${category.id}",
+                    text = "R${rule.number}",
                     color = color,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Black
@@ -137,22 +132,22 @@ fun RuleVerticalCard(category: RuleCategory, onClick: () -> Unit) {
 
             Column(modifier = Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = category.iconEmoji, fontSize = 20.sp)
+                    Text(text = rule.emoji, fontSize = 20.sp)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = category.title,
+                        text = rule.title,
                         style = MaterialTheme.typography.bodyLarge,
                         color = Color.White
                     )
                 }
                 Text(
-                    text = category.description,
+                    text = rule.subtitle,
                     style = MaterialTheme.typography.bodyMedium,
                     maxLines = 2
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "${category.chaptersCount} capítulos · ${category.lessonsCount} lecciones",
+                    text = "${rule.chaptersCount} capítulos",
                     color = color,
                     style = MaterialTheme.typography.labelSmall,
                     modifier = Modifier
@@ -164,7 +159,7 @@ fun RuleVerticalCard(category: RuleCategory, onClick: () -> Unit) {
 
             Spacer(modifier = Modifier.width(12.dp))
 
-            CircularProgress(progress = category.progress, categoryColor = color)
+            CircularProgress(progress = rule.progress, categoryColor = color)
         }
     }
 }

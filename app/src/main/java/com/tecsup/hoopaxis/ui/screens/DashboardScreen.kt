@@ -24,13 +24,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.tecsup.hoopaxis.HoopAxisApplication
-import com.tecsup.hoopaxis.data.model.RecentChapter
-import com.tecsup.hoopaxis.data.model.RuleCategory
+import com.tecsup.hoopaxis.data.model.Rule
 import com.tecsup.hoopaxis.ui.components.BottomNavBar
 import com.tecsup.hoopaxis.ui.components.CircularProgress
 import com.tecsup.hoopaxis.ui.components.GlassCard
@@ -39,7 +37,7 @@ import com.tecsup.hoopaxis.viewmodel.DashboardViewModel
 
 @Composable
 fun DashboardScreen(
-    onNavigateToDetail: (Int) -> Unit = {},
+    onNavigateToDetail: (String) -> Unit = {},
     onNavigateToHome: () -> Unit = {},
     onNavigateToRules: () -> Unit = {},
     onNavigateToChapters: () -> Unit = {},
@@ -89,11 +87,9 @@ fun DashboardScreen(
             ProBanner()
             Spacer(modifier = Modifier.height(24.dp))
             CategorySection(
-                categories = uiState.categories,
+                rules = uiState.rules,
                 onCategoryClick = onNavigateToDetail
             )
-            Spacer(modifier = Modifier.height(32.dp))
-            ContinueStudyingSection(uiState.recentChapters)
             Spacer(modifier = Modifier.height(32.dp))
             PublicityBanner()
             Spacer(modifier = Modifier.height(32.dp))
@@ -196,7 +192,7 @@ fun StatusBadge(text: String, color: Color, icon: ImageVector) {
                 text = text.uppercase(),
                 color = color,
                 fontSize = 10.sp,
-                fontWeight = FontWeight.Black,
+                fontWeight = androidx.compose.ui.text.font.FontWeight.Black,
                 letterSpacing = 1.5.sp
             )
         }
@@ -244,7 +240,7 @@ fun ProBanner() {
                     .padding(horizontal = 22.dp, vertical = 10.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = "VER", color = AppColors.Background, fontWeight = FontWeight.Black)
+                Text(text = "VER", color = AppColors.Background, fontWeight = androidx.compose.ui.text.font.FontWeight.Black)
             }
         }
     }
@@ -252,8 +248,8 @@ fun ProBanner() {
 
 @Composable
 fun CategorySection(
-    categories: List<RuleCategory>,
-    onCategoryClick: (Int) -> Unit
+    rules: List<Rule>,
+    onCategoryClick: (String) -> Unit
 ) {
     Column {
         Row(
@@ -267,22 +263,17 @@ fun CategorySection(
                 color = AppColors.TextSecondary
             )
             TextButton(onClick = { }) {
-                Text(text = "Ver todas →", color = AppColors.Purple, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                Text(text = "Ver todas →", color = AppColors.Purple, fontSize = 14.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
             }
         }
         Spacer(modifier = Modifier.height(14.dp))
 
-        categories.chunked(2).forEach { rowItems ->
+        rules.chunked(2).forEach { rowItems ->
             Row(modifier = Modifier.fillMaxWidth()) {
                 rowItems.forEachIndexed { index, item ->
-                    val color = when(item.id % 4) {
-                        0 -> AppColors.Purple
-                        1 -> AppColors.Pink
-                        2 -> AppColors.Blue
-                        else -> AppColors.Gold
-                    }
+                    val color = Color(android.graphics.Color.parseColor(item.color))
                     CategoryCard(
-                        item = item,
+                        rule = item,
                         categoryColor = color,
                         modifier = Modifier.weight(1f),
                         onCategoryClick = onCategoryClick
@@ -302,15 +293,15 @@ fun CategorySection(
 
 @Composable
 fun CategoryCard(
-    item: RuleCategory,
+    rule: Rule,
     categoryColor: Color,
     modifier: Modifier = Modifier,
-    onCategoryClick: (Int) -> Unit
+    onCategoryClick: (String) -> Unit
 ) {
     GlassCard(
         modifier = modifier
             .height(160.dp)
-            .clickable { onCategoryClick(item.id) },
+            .clickable { onCategoryClick(rule.id) },
         categoryColor = categoryColor
     ) {
         Column(
@@ -329,94 +320,24 @@ fun CategoryCard(
                         .background(Color.White.copy(alpha = 0.05f)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = item.iconEmoji, fontSize = 24.sp)
+                    Text(text = rule.emoji, fontSize = 24.sp)
                 }
-                CircularProgress(progress = item.progress, categoryColor = categoryColor)
+                CircularProgress(progress = rule.progress, categoryColor = categoryColor)
             }
             
             Column {
                 Text(
-                    text = item.title,
+                    text = rule.title,
                     style = MaterialTheme.typography.bodyLarge,
                     color = Color.White,
                     maxLines = 2
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "${item.chaptersCount} capítulos",
+                    text = "${rule.chaptersCount} capítulos",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
-        }
-    }
-}
-
-@Composable
-fun ContinueStudyingSection(recentChapters: List<RecentChapter>) {
-    Column {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "CONTINÚA ESTUDIANDO",
-                style = MaterialTheme.typography.labelSmall,
-                color = AppColors.TextSecondary
-            )
-            TextButton(onClick = { }) {
-                Text(text = "Todos →", color = AppColors.Purple, fontSize = 14.sp, fontWeight = FontWeight.Bold)
-            }
-        }
-        Spacer(modifier = Modifier.height(14.dp))
-
-        if (recentChapters.isEmpty()) {
-            Text(
-                text = "Inicia una lección para ver tu progreso",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(vertical = 16.dp)
-            )
-        } else {
-            recentChapters.forEach { chapter ->
-                RecentChapterCard(chapter)
-                Spacer(modifier = Modifier.height(14.dp))
-            }
-        }
-    }
-}
-
-@Composable
-fun RecentChapterCard(chapter: RecentChapter) {
-    GlassCard(modifier = Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
-                Box(
-                    modifier = Modifier
-                        .size(44.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Color.White.copy(alpha = 0.05f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(text = chapter.iconEmoji, fontSize = 22.sp)
-                }
-                Spacer(modifier = Modifier.width(16.dp))
-                Column {
-                    Text(
-                        text = chapter.title,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = Color.White
-                    )
-                    Text(
-                        text = chapter.categoryName,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-            }
-            CircularProgress(progress = chapter.progress, categoryColor = AppColors.Purple)
         }
     }
 }
