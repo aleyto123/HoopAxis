@@ -7,12 +7,12 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.tecsup.hoopaxis.HoopAxisApplication
-import com.tecsup.hoopaxis.ui.screens.ChaptersScreen
-import com.tecsup.hoopaxis.ui.screens.DashboardScreen
-import com.tecsup.hoopaxis.ui.screens.ProfileScreen
-import com.tecsup.hoopaxis.ui.screens.RuleDetailScreen
-import com.tecsup.hoopaxis.ui.screens.RulesScreen
+import com.tecsup.hoopaxis.data.model.User
+import com.tecsup.hoopaxis.ui.screens.*
+import com.tecsup.hoopaxis.viewmodel.AuthViewModel
+import com.tecsup.hoopaxis.viewmodel.DashboardViewModel
 
 sealed class Screen(val route: String) {
     object Splash : Screen("splash")
@@ -37,8 +37,7 @@ sealed class Screen(val route: String) {
     object QuizResults : Screen("quiz_results/{score}/{total}") {
         fun createRoute(score: Int, total: Int) = "quiz_results/$score/$total"
     }
-    object Pro : Screen("pro_screen")
-    object PaymentSuccess : Screen("payment_success")
+    object Admin : Screen("admin_panel")
 }
 
 @Composable
@@ -46,20 +45,46 @@ fun HoopAxisNavGraph(navController: NavHostController) {
     val context = LocalContext.current
     val repository = (context.applicationContext as HoopAxisApplication).repository
     val user by repository.currentUser.collectAsState(initial = null)
+    
+    val authViewModel: AuthViewModel = viewModel(
+        factory = object : androidx.lifecycle.ViewModelProvider.Factory {
+            override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+                return AuthViewModel(repository) as T
+            }
+        }
+    )
 
     NavHost(
         navController = navController,
         startDestination = Screen.Splash.route
     ) {
         composable(Screen.Splash.route) {
+            val auth = remember { com.google.firebase.auth.FirebaseAuth.getInstance() }
             LaunchedEffect(user) {
                 if (user != null && user?.isLoggedIn == true) {
                     navController.navigate(Screen.Dashboard.route) {
                         popUpTo(Screen.Splash.route) { inclusive = true }
                     }
                 } else {
-                    navController.navigate(Screen.Login.route) {
-                        popUpTo(Screen.Splash.route) { inclusive = true }
+                    // Si Room no tiene usuario, verificamos Firebase para restaurar la sesión
+                    val firebaseUser = auth.currentUser
+                    if (firebaseUser != null) {
+                        val restoredUser = User(
+                            id = firebaseUser.uid,
+                            name = firebaseUser.displayName ?: "Árbitro",
+                            email = firebaseUser.email ?: "",
+                            isLoggedIn = true
+                        )
+                        repository.login(restoredUser)
+                        // Al guardar en el repositorio, 'user' se actualizará y el LaunchedEffect se disparará de nuevo
+                    } else {
+                        // No hay sesión en Firebase tampoco
+                        kotlinx.coroutines.delay(800) // Un poco más de tiempo para el Splash
+                        if (user == null) {
+                            navController.navigate(Screen.Login.route) {
+                                popUpTo(Screen.Splash.route) { inclusive = true }
+                            }
+                        }
                     }
                 }
             }
@@ -87,11 +112,16 @@ fun HoopAxisNavGraph(navController: NavHostController) {
                     navController.navigate(Screen.Rules.route)
                 },
                 onNavigateToChapters = {
-                    // For global chapters view, we might need a default or another screen
                     navController.navigate(Screen.Chapters.createRoute("all")) 
                 },
                 onNavigateToProfile = {
                     navController.navigate(Screen.Profile.route)
+                },
+                onNavigateToAdmin = {
+                    navController.navigate(Screen.Admin.route)
+                },
+                onNavigateToChapterLessonList = { chapterId, title, color ->
+                    navController.navigate(Screen.LessonList.createRoute(chapterId, title, color))
                 }
             )
         }
@@ -115,6 +145,9 @@ fun HoopAxisNavGraph(navController: NavHostController) {
                 },
                 onNavigateToProfile = {
                     navController.navigate(Screen.Profile.route)
+                },
+                onNavigateToAdmin = {
+                    navController.navigate(Screen.Admin.route)
                 }
             )
         }
@@ -141,6 +174,9 @@ fun HoopAxisNavGraph(navController: NavHostController) {
                 onNavigateToProfile = {
                     navController.navigate(Screen.Profile.route)
                 },
+                onNavigateToAdmin = {
+                    navController.navigate(Screen.Admin.route)
+                },
                 onBack = { navController.popBackStack() }
             )
         }
@@ -155,11 +191,21 @@ fun HoopAxisNavGraph(navController: NavHostController) {
                     navController.navigate(Screen.Rules.route)
                 },
                 onNavigateToChapters = {
-                    navController.navigate(Screen.Chapters.route)
+                    navController.navigate(Screen.Chapters.createRoute("all"))
                 },
                 onNavigateToProfile = {
                     navController.navigate(Screen.Profile.route) {
                         popUpTo(Screen.Profile.route) { inclusive = true }
+                    }
+                },
+                onNavigateToAdmin = {
+                    navController.navigate(Screen.Admin.route)
+                },
+                onLogout = {
+                    authViewModel.logout {
+                        navController.navigate(Screen.Login.route) {
+                            popUpTo(0) { inclusive = true }
+                        }
                     }
                 }
             )
@@ -198,12 +244,8 @@ fun HoopAxisNavGraph(navController: NavHostController) {
             com.tecsup.hoopaxis.ui.screens.QuizResultsScreen(navController, score, total)
         }
         
-        composable(Screen.Pro.route) {
-            com.tecsup.hoopaxis.ui.screens.ProScreen(navController)
-        }
-        
-        composable(Screen.PaymentSuccess.route) {
-            com.tecsup.hoopaxis.ui.screens.PaymentSuccessScreen(navController)
+        composable(Screen.Admin.route) {
+            AdminPanelScreen(onBack = { navController.popBackStack() })
         }
     }
 }

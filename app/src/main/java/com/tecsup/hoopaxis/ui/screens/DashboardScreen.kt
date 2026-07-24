@@ -9,8 +9,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Campaign
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.outlined.Notifications
@@ -41,7 +41,9 @@ fun DashboardScreen(
     onNavigateToHome: () -> Unit = {},
     onNavigateToRules: () -> Unit = {},
     onNavigateToChapters: () -> Unit = {},
-    onNavigateToProfile: () -> Unit = {}
+    onNavigateToProfile: () -> Unit = {},
+    onNavigateToAdmin: () -> Unit = {},
+    onNavigateToChapterLessonList: (String, String, String) -> Unit = { _, _, _ -> }
 ) {
     val context = LocalContext.current
     val repository = (context.applicationContext as HoopAxisApplication).repository
@@ -73,6 +75,19 @@ fun DashboardScreen(
             Spacer(modifier = Modifier.height(24.dp))
             Header(userName = uiState.user?.name ?: "Árbitro")
             
+            if (uiState.user?.isAdmin == true) {
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(
+                    onClick = onNavigateToAdmin,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = AppColors.Purple)
+                ) {
+                    Icon(Icons.Default.Settings, null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("PANEL DE ADMINISTRADOR")
+                }
+            }
+            
             if (uiState.isLoading) {
                 LinearProgressIndicator(
                     modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
@@ -84,14 +99,25 @@ fun DashboardScreen(
             Spacer(modifier = Modifier.height(24.dp))
             ProgressCard()
             Spacer(modifier = Modifier.height(24.dp))
-            ProBanner()
-            Spacer(modifier = Modifier.height(24.dp))
             CategorySection(
                 rules = uiState.rules,
-                onCategoryClick = onNavigateToDetail
+                onCategoryClick = onNavigateToDetail,
+                onViewAllClick = onNavigateToRules
             )
             Spacer(modifier = Modifier.height(32.dp))
-            PublicityBanner()
+            ContinueStudyingSection(
+                chapters = uiState.allChapters.filter { it.progress > 0 && it.progress < 1 }.take(3),
+                rules = uiState.rules,
+                onChapterClick = { chapter ->
+                    val rule = uiState.rules.find { it.id == chapter.ruleId }
+                    onNavigateToChapterLessonList(
+                        chapter.id, 
+                        chapter.title, 
+                        rule?.color?.removePrefix("#") ?: "C96BFF"
+                    )
+                },
+                onViewAllClick = onNavigateToChapters
+            )
             Spacer(modifier = Modifier.height(32.dp))
         }
     }
@@ -199,57 +225,12 @@ fun StatusBadge(text: String, color: Color, icon: ImageVector) {
     }
 }
 
-@Composable
-fun ProBanner() {
-    GlassCard(modifier = Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(52.dp)
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(AppColors.Gold.copy(alpha = 0.1f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.EmojiEvents,
-                    contentDescription = null,
-                    tint = AppColors.Gold,
-                    modifier = Modifier.size(30.dp)
-                )
-            }
-            Spacer(modifier = Modifier.width(16.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = "Modo Árbitro Pro",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = Color.White
-                )
-                Text(
-                    text = "Artículos FIBA oficiales · Sin anuncios · Exámenes",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(AppColors.Gold)
-                    .clickable { }
-                    .padding(horizontal = 22.dp, vertical = 10.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(text = "VER", color = AppColors.Background, fontWeight = androidx.compose.ui.text.font.FontWeight.Black)
-            }
-        }
-    }
-}
 
 @Composable
 fun CategorySection(
     rules: List<Rule>,
-    onCategoryClick: (String) -> Unit
+    onCategoryClick: (String) -> Unit,
+    onViewAllClick: () -> Unit
 ) {
     Column {
         Row(
@@ -262,7 +243,7 @@ fun CategorySection(
                 style = MaterialTheme.typography.labelSmall,
                 color = AppColors.TextSecondary
             )
-            TextButton(onClick = { }) {
+            TextButton(onClick = onViewAllClick) {
                 Text(text = "Ver todas →", color = AppColors.Purple, fontSize = 14.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
             }
         }
@@ -343,45 +324,100 @@ fun CategoryCard(
 }
 
 @Composable
-fun PublicityBanner() {
-    GlassCard(modifier = Modifier.fillMaxWidth()) {
+fun ContinueStudyingSection(
+    chapters: List<com.tecsup.hoopaxis.data.model.Chapter>,
+    rules: List<Rule>,
+    onChapterClick: (com.tecsup.hoopaxis.data.model.Chapter) -> Unit,
+    onViewAllClick: () -> Unit
+) {
+    Column {
         Row(
             modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(Color.White.copy(alpha = 0.1f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Campaign,
-                    contentDescription = null,
-                    tint = Color.White.copy(alpha = 0.6f),
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-            Spacer(modifier = Modifier.width(16.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = "PUBLICIDAD",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = AppColors.TextMuted
-                )
-                Text(
-                    text = "Elimina los anuncios con Árbitro Pro →",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = Color.White
-                )
-            }
-            Icon(
-                imageVector = Icons.Default.EmojiEvents,
-                contentDescription = null,
-                tint = AppColors.Gold,
-                modifier = Modifier.size(20.dp)
+            Text(
+                text = "CONTINÚA ESTUDIANDO",
+                style = MaterialTheme.typography.labelSmall,
+                color = AppColors.TextSecondary,
+                letterSpacing = 1.2.sp
             )
+            TextButton(onClick = onViewAllClick) {
+                Text(text = "Todos →", color = AppColors.Purple, fontSize = 14.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+            }
+        }
+        Spacer(modifier = Modifier.height(14.dp))
+
+        if (chapters.isEmpty()) {
+            GlassCard(modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    text = "Aún no has empezado ningún capítulo. ¡Comienza ahora!",
+                    color = Color.White.copy(alpha = 0.6f),
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                )
+            }
+        } else {
+            chapters.forEach { chapter ->
+                val rule = rules.find { it.id == chapter.ruleId }
+                ContinueChapterCard(
+                    chapter = chapter,
+                    ruleName = rule?.title ?: "",
+                    ruleColor = Color(android.graphics.Color.parseColor(rule?.color ?: "#C96BFF")),
+                    onClick = { onChapterClick(chapter) }
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+            }
         }
     }
 }
+
+@Composable
+fun ContinueChapterCard(
+    chapter: com.tecsup.hoopaxis.data.model.Chapter,
+    ruleName: String,
+    ruleColor: Color,
+    onClick: () -> Unit
+) {
+    GlassCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(Color.White.copy(alpha = 0.05f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = chapter.emoji, fontSize = 20.sp)
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                Column {
+                    Text(
+                        text = "Cap. ${chapter.number} — ${chapter.title}",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = Color.White,
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                    )
+                    Text(
+                        text = ruleName,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = AppColors.TextSecondary
+                    )
+                }
+            }
+            CircularProgress(progress = chapter.progress, categoryColor = ruleColor, size = 44.dp)
+        }
+    }
+}
+

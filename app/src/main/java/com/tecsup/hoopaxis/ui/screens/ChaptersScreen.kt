@@ -11,6 +11,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -38,6 +39,7 @@ fun ChaptersScreen(
     onNavigateToRules: () -> Unit = {},
     onNavigateToChapters: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {},
+    onNavigateToAdmin: () -> Unit = {},
     onBack: () -> Unit = {}
 ) {
     val context = LocalContext.current
@@ -80,7 +82,7 @@ fun ChaptersScreen(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column {
                     Text(
-                        text = if (ruleId == "all" || ruleId == null) "NIVEL 2 — TODOS LOS MÓDULOS" else "NIVEL 2 — REGLA ${rule?.number ?: ""}",
+                        text = if (ruleId == "all" || ruleId == null) "TODOS LOS MÓDULOS" else "REGLA ${rule?.number ?: ""}",
                         style = MaterialTheme.typography.labelSmall,
                         color = AppColors.TextSecondary,
                         letterSpacing = 1.sp
@@ -89,6 +91,19 @@ fun ChaptersScreen(
                         text = if (ruleId == "all" || ruleId == null) "${chapters.size} Capítulos" else rule?.title ?: "Capítulos",
                         style = MaterialTheme.typography.displayLarge
                     )
+                }
+            }
+
+            if (uiState.user?.isAdmin == true) {
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(
+                    onClick = onNavigateToAdmin,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = AppColors.Purple)
+                ) {
+                    Icon(Icons.Default.Settings, null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("ADMINISTRAR")
                 }
             }
 
@@ -105,7 +120,6 @@ fun ChaptersScreen(
                 Spacer(modifier = Modifier.height(16.dp))
             }
             
-            PublicityBanner()
             Spacer(modifier = Modifier.height(32.dp))
         }
     }

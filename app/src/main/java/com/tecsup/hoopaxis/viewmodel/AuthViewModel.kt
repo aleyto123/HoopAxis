@@ -67,6 +67,30 @@ class AuthViewModel(private val repository: RuleRepository) : ViewModel() {
             _error.value = "Por favor, completa todos los campos."
             return
         }
+
+        // Special Admin Login
+        if (email == "admin" && password == "9055") {
+            viewModelScope.launch {
+                _isLoading.value = true
+                try {
+                    val adminUser = User(
+                        id = "admin_uid",
+                        name = "Administrador",
+                        email = "admin",
+                        isLoggedIn = true,
+                        isAdmin = true
+                    )
+                    repository.login(adminUser)
+                    onSuccess()
+                } catch (e: Exception) {
+                    _error.value = "Error al iniciar sesión como admin."
+                } finally {
+                    _isLoading.value = false
+                }
+            }
+            return
+        }
+
         viewModelScope.launch {
             _isLoading.value = true
             _error.value = null
@@ -126,5 +150,17 @@ class AuthViewModel(private val repository: RuleRepository) : ViewModel() {
 
     fun updateError(message: String) {
         _error.value = message
+    }
+
+    fun logout(onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            try {
+                auth.signOut()
+                repository.logout()
+                onSuccess()
+            } catch (e: Exception) {
+                _error.value = "Error al cerrar sesión: ${e.localizedMessage}"
+            }
+        }
     }
 }

@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -34,7 +36,8 @@ fun RulesScreen(
     onNavigateToHome: () -> Unit = {},
     onNavigateToRules: () -> Unit = {},
     onNavigateToChapters: () -> Unit = {},
-    onNavigateToProfile: () -> Unit = {}
+    onNavigateToProfile: () -> Unit = {},
+    onNavigateToAdmin: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val repository = (context.applicationContext as HoopAxisApplication).repository
@@ -66,7 +69,7 @@ fun RulesScreen(
             Spacer(modifier = Modifier.height(32.dp))
             
             Text(
-                text = "NIVEL 1",
+                text = "ESTUDIO",
                 style = MaterialTheme.typography.labelSmall,
                 color = AppColors.TextSecondary,
                 letterSpacing = 1.sp
@@ -82,6 +85,19 @@ fun RulesScreen(
                 style = MaterialTheme.typography.bodyMedium
             )
 
+            if (uiState.user?.isAdmin == true) {
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(
+                    onClick = onNavigateToAdmin,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = AppColors.Purple)
+                ) {
+                    Icon(Icons.Default.Settings, null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("ADMINISTRAR CONTENIDO")
+                }
+            }
+
             Spacer(modifier = Modifier.height(24.dp))
 
             uiState.rules.forEach { rule ->
@@ -92,7 +108,6 @@ fun RulesScreen(
                 Spacer(modifier = Modifier.height(16.dp))
             }
             
-            PublicityBanner()
             Spacer(modifier = Modifier.height(32.dp))
         }
     }

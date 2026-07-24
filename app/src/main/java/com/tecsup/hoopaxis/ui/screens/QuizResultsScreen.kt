@@ -25,8 +25,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.tecsup.hoopaxis.data.repository.UserRepository
-import com.tecsup.hoopaxis.ui.components.AdBannerComponent
 import com.tecsup.hoopaxis.ui.components.CircularProgress
 import com.tecsup.hoopaxis.ui.components.GlassCard
 import com.tecsup.hoopaxis.ui.theme.AppColors
@@ -36,7 +34,6 @@ fun QuizResultsScreen(navController: NavController, score: String?, total: Strin
     val s = score?.toIntOrNull() ?: 0
     val t = total?.toIntOrNull() ?: 8
     val percentage = (s.toFloat() / t.toFloat() * 100).toInt()
-    val isPro = UserRepository.isProUser
 
     AnimatedVisibility(visible = true, enter = fadeIn() + slideInHorizontally { it / 3 }) {
         Column(
@@ -80,13 +77,6 @@ fun QuizResultsScreen(navController: NavController, score: String?, total: Strin
                 items(List(t) { it }) { index ->
                     val isCorrect = index < s
                     ReviewItem(isCorrect = isCorrect, index = index)
-                }
-
-                if (!isPro) {
-                    item {
-                        Spacer(modifier = Modifier.height(12.dp))
-                        AdBannerComponent(onClick = { navController.navigate("pro_screen") })
-                    }
                 }
             }
 

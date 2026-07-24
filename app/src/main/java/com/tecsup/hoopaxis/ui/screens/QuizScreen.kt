@@ -18,8 +18,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.tecsup.hoopaxis.data.repository.UserRepository
-import com.tecsup.hoopaxis.ui.components.AdBannerComponent
 import com.tecsup.hoopaxis.ui.theme.AppColors
 
 data class QuizQuestion(
@@ -51,7 +49,6 @@ fun QuizScreen(navController: NavController) {
     val history = remember { mutableStateListOf<Boolean>() }
 
     val currentQuestion = questions[currentIndex]
-    val isPro = UserRepository.isProUser
 
     AnimatedVisibility(visible = true, enter = fadeIn() + slideInHorizontally { it / 3 }) {
         Column(
@@ -208,11 +205,6 @@ fun QuizScreen(navController: NavController) {
                         Text(if (currentIndex < 7) "Siguiente →" else "Ver resultados", color = Color.White, fontWeight = FontWeight.Black)
                     }
                 }
-            }
-
-            if (!isPro && selectedAnswer != null) {
-                Spacer(modifier = Modifier.height(24.dp))
-                AdBannerComponent(onClick = { navController.navigate("pro_screen") })
             }
             
             Spacer(modifier = Modifier.height(40.dp))

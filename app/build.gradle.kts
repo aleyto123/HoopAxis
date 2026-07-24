@@ -10,7 +10,7 @@ android {
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "com.tecsup.hoopaxis"
+        applicationId = "com.tecsup.HoopAxis"
         minSdk = 26
         targetSdk = 35
         versionCode = 1
@@ -54,6 +54,7 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
     implementation(libs.google.auth)
     implementation(libs.kotlinx.coroutines.play.services)
 

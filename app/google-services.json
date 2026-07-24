@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:456317435908:android:f7a97677905c9c26547551",
         "android_client_info": {
-          "package_name": "com.tecsup.hoopaxis"
+          "package_name": "com.tecsup.HoopAxis"
         }
       },
       "oauth_client": [
@@ -17,7 +17,7 @@
           "client_id": "456317435908-ljh732v7k9lpfo85qg4vp4e2vv0mkopl.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.tecsup.hoopaxis",
+            "package_name": "com.tecsup.HoopAxis",
             "certificate_hash": "89beb96e5a4d1e4b4215de91a4ee96de77ea4c41"
           }
         },

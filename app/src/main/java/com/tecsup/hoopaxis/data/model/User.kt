@@ -9,5 +9,6 @@ data class User(
     val name: String,
     val email: String,
     val profileImageUrl: String? = null,
-    val isLoggedIn: Boolean = false
+    val isLoggedIn: Boolean = false,
+    val isAdmin: Boolean = false
 )

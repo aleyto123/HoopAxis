@@ -67,7 +67,7 @@ fun LoginScreen(
     var passwordVisible by remember { mutableStateOf(false) }
     var selectedTab by remember { mutableIntStateOf(0) } // 0: Login, 1: Register
 
-    val clientId = stringResource(R.string.default_web_client_id)
+    val clientId = "456317435908-u1g33ki05v6out7i73g8dmlilp891udn.apps.googleusercontent.com"
     val gso = remember(clientId) {
         GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(clientId)

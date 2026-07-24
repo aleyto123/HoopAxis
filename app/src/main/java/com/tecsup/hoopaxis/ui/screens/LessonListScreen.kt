@@ -31,8 +31,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.tecsup.hoopaxis.HoopAxisApplication
 import com.tecsup.hoopaxis.data.model.Article
-import com.tecsup.hoopaxis.data.repository.UserRepository
-import com.tecsup.hoopaxis.ui.components.AdBannerComponent
 import com.tecsup.hoopaxis.ui.theme.AppColors
 import com.tecsup.hoopaxis.viewmodel.DashboardViewModel
 
@@ -52,7 +50,6 @@ fun LessonListScreen(
     
     val articles by viewModel.articles.collectAsState()
     val ruleColor = Color(android.graphics.Color.parseColor("#${ruleColorHex ?: "C96BFF"}"))
-    val isPro = UserRepository.isProUser
 
     LaunchedEffect(chapterId) {
         chapterId?.let { viewModel.selectChapter(it) }
@@ -127,25 +124,13 @@ fun LessonListScreen(
                     contentPadding = PaddingValues(bottom = 32.dp)
                 ) {
                     items(articles) { article ->
-                        val isLocked = article.isProOnly && !isPro
                         ArticleCard(
                             article = article,
                             ruleColor = ruleColor,
-                            isLocked = isLocked,
                             onClick = {
-                                if (isLocked) {
-                                    navController.navigate("pro_screen")
-                                } else {
-                                    navController.navigate("lesson/${article.id}/${ruleColorHex}")
-                                }
+                                navController.navigate("lesson/${article.id}/${ruleColorHex}")
                             }
                         )
-                    }
-
-                    if (!isPro) {
-                        item {
-                            AdBannerComponent(onClick = { navController.navigate("pro_screen") })
-                        }
                     }
                 }
             }
@@ -157,7 +142,6 @@ fun LessonListScreen(
 fun ArticleCard(
     article: Article,
     ruleColor: Color,
-    isLocked: Boolean,
     onClick: () -> Unit
 ) {
     Box(
@@ -173,46 +157,36 @@ fun ArticleCard(
             .background(
                 androidx.compose.ui.graphics.Brush.linearGradient(
                     colors = listOf(
-                        Color.White.copy(alpha = if (isLocked) 0.05f else 0.10f),
-                        Color.White.copy(alpha = if (isLocked) 0.03f else 0.05f)
+                        Color.White.copy(alpha = 0.10f),
+                        Color.White.copy(alpha = 0.05f)
                     )
                 )
             )
             .border(
                 width = 1.dp,
-                color = if (isLocked) Color(0xFFFFD166).copy(alpha = 0.25f) else Color.White.copy(alpha = 0.13f),
+                color = Color.White.copy(alpha = 0.13f),
                 shape = RoundedCornerShape(24.dp)
             )
             .clickable { onClick() }
             .padding(16.dp)
     ) {
         Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.drawWithContent {
-                drawContent()
-                if (isLocked) {
-                    drawRect(color = Color.Black.copy(alpha = 0.35f))
-                }
-            }
+            verticalAlignment = Alignment.CenterVertically
         ) {
             // Left Badge
             Box(
                 modifier = Modifier
                     .size(40.dp)
                     .clip(RoundedCornerShape(12.dp))
-                    .background(if (isLocked) Color(0xFFFFD166).copy(alpha = 0.15f) else ruleColor.copy(alpha = 0.2f)),
+                    .background(ruleColor.copy(alpha = 0.2f)),
                 contentAlignment = Alignment.Center
             ) {
-                if (isLocked) {
-                    Icon(Icons.Default.Lock, null, tint = Color(0xFFFFD166), modifier = Modifier.size(18.dp))
-                } else {
-                    Text(
-                        text = "${article.articleNumber.last()}", // Demo showing last digit
-                        color = ruleColor,
-                        fontWeight = FontWeight.Black,
-                        fontSize = 16.sp
-                    )
-                }
+                Text(
+                    text = "${article.articleNumber.last()}", // Demo showing last digit
+                    color = ruleColor,
+                    fontWeight = FontWeight.Black,
+                    fontSize = 16.sp
+                )
             }
 
             Spacer(modifier = Modifier.width(16.dp))
@@ -231,22 +205,10 @@ fun ArticleCard(
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold
                 )
-                if (isLocked) {
-                    Text(
-                        text = "Solo Pro · Desbloquear →",
-                        color = Color(0xFFFFD166),
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
             }
 
             // Right Icon
-            if (isLocked) {
-                Icon(Icons.Default.Star, null, tint = Color(0xFFFFD166), modifier = Modifier.size(18.dp))
-            } else {
-                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null, tint = Color.White.copy(alpha = 0.25f))
-            }
+            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null, tint = Color.White.copy(alpha = 0.25f))
         }
     }
 }

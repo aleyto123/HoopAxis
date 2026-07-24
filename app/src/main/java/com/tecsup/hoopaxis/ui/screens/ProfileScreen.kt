@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.rounded.Logout
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.rounded.*
@@ -40,6 +41,7 @@ fun ProfileScreen(
     onNavigateToRules: () -> Unit = {},
     onNavigateToChapters: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {},
+    onNavigateToAdmin: () -> Unit = {},
     onLogout: () -> Unit = {}
 ) {
     val context = LocalContext.current
@@ -117,38 +119,17 @@ fun ProfileScreen(
                 style = MaterialTheme.typography.displayLarge
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Activar Modo Árbitro Pro Banner
-            GlassCard(
-                modifier = Modifier.fillMaxWidth(),
-                categoryColor = AppColors.Gold
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
+            if (uiState.user?.isAdmin == true) {
+                Spacer(modifier = Modifier.height(16.dp))
+                GlassCard(
+                    modifier = Modifier.fillMaxWidth().clickable { onNavigateToAdmin() },
+                    categoryColor = AppColors.Purple
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Rounded.EmojiEvents,
-                            contentDescription = null,
-                            tint = AppColors.Gold,
-                            modifier = Modifier.size(20.dp)
-                        )
+                        Icon(Icons.Default.Settings, null, tint = AppColors.Purple)
                         Spacer(modifier = Modifier.width(12.dp))
-                        Text(
-                            text = "Activar Modo Árbitro Pro",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = Color.White
-                        )
+                        Text("Configuración de Administrador", color = Color.White, fontWeight = FontWeight.Bold)
                     }
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
-                        contentDescription = null,
-                        tint = AppColors.TextSecondary,
-                        modifier = Modifier.size(16.dp)
-                    )
                 }
             }
 
@@ -192,26 +173,9 @@ fun ProfileScreen(
                             style = MaterialTheme.typography.headlineMedium
                         )
                         Text(
-                            text = "Nivel 4 — Árbitro Amateur",
+                            text = "Rango: Árbitro Federado",
                             style = MaterialTheme.typography.bodyMedium
                         )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Row {
-                            repeat(4) {
-                                Icon(
-                                    imageVector = Icons.Default.Star,
-                                    contentDescription = null,
-                                    tint = AppColors.Gold,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                            }
-                            Icon(
-                                imageVector = Icons.Default.Star,
-                                contentDescription = null,
-                                tint = AppColors.TextMuted,
-                                modifier = Modifier.size(16.dp)
-                            )
-                        }
                     }
 
                     IconButton(
@@ -245,7 +209,7 @@ fun ProfileScreen(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            text = "Nivel 4 — Árbitro Amateur",
+                            text = "Rango: Árbitro Federado",
                             style = MaterialTheme.typography.bodyMedium
                         )
                         Text(

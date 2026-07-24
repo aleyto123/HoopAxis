@@ -57,7 +57,22 @@ class DashboardViewModel(private val repository: RuleRepository) : ViewModel() {
     )
 
     init {
-        loadInitialData()
+        refreshData()
+    }
+
+    fun refreshData() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            // Intentar sincronizar desde Firebase
+            repository.syncFromRemote()
+            
+            // Verificar si tenemos datos locales, si no, cargar los básicos
+            val currentRules = repository.allRules.first()
+            if (currentRules.isEmpty()) {
+                loadInitialData()
+            }
+            _isLoading.value = false
+        }
     }
 
     fun selectRule(ruleId: String) {
@@ -116,21 +131,21 @@ class DashboardViewModel(private val repository: RuleRepository) : ViewModel() {
                 Article("a1", "c1", "¿Qué es el baloncesto?", "Art. 1", 
                     "El baloncesto es un deporte de equipo en el que dos equipos de cinco jugadores cada uno intentan anotar puntos lanzando el balón a través del aro rival, que está ubicado a 3,05 m del suelo. El equipo que logra más puntos al finalizar el tiempo reglamentario gana el partido.", 
                     "Art. 1 — Definiciones. El baloncesto es jugado por dos (2) equipos de cinco (5) jugadores cada uno. El objetivo de cada equipo es encestar en la cesta del equipo contrario e impedir que el otro equipo tome posesión del balón o enceste.", 
-                    listOf("2 equipos de 5 jugadores", "Aro a 3,05 m de altura", "Más puntos = victoria"), false),
+                    listOf("2 equipos de 5 jugadores", "Aro a 3,05 m de altura", "Más puntos = victoria")),
                 Article("a2", "c1", "El balón en juego", "Art. 1.2", 
                     "Un balón está en juego cuando el árbitro lo pone en circulación válida: durante un salto entre dos, cuando un jugador lanza a canasta, o cuando el árbitro lo entrega para saque o tiro libre. Fuera del juego, el reloj se detiene.", 
                     "Art. 1.2 — El balón está en juego cuando: (a) durante un salto entre dos, el árbitro lanza el balón al aire y es tocado legalmente por un saltador. (b) durante un tiro libre, el árbitro entrega el balón al tirador. (c) durante un saque de banda, el árbitro entrega el balón al jugador que saca o lo pone a su disposición.", 
-                    listOf("Salto entre dos", "Entrega para tiro libre", "Saque de banda"), false),
+                    listOf("Salto entre dos", "Entrega para tiro libre", "Saque de banda")),
                 
                 // Rule 1, Chapter 2
                 Article("a3", "c2", "Estructura temporal del partido", "Art. 8", 
                     "Un partido oficial FIBA se juega en 4 cuartos de 10 minutos cronometrados cada uno. Entre el primer y segundo cuarto, y entre el tercero y cuarto, hay un descanso de 2 minutos. El medio tiempo dura 15 minutos. Si al final del cuarto período hay empate, se juegan prórrogas de 5 minutos.", 
                     "Art. 8 — Períodos de juego. El partido constará de cuatro (4) períodos de diez (10) minutos. Si el marcador está empatado al final del cuarto período, el partido continuará con un período extra de cinco (5) minutos, o tantos períodos extra de cinco (5) minutos como sea necesario para romper el empate.", 
-                    listOf("4 × 10 minutos", "Descanso 2 min entre cuartos", "Medio tiempo 15 min", "Prórroga 5 min"), false),
+                    listOf("4 × 10 minutos", "Descanso 2 min entre cuartos", "Medio tiempo 15 min", "Prórroga 5 min")),
                 Article("a4", "c2", "Tiempo de juego efectivo", "Art. 8.3", 
                     "El reloj se para cada vez que el árbitro pita. Solo cuenta el tiempo en que el balón está vivo. En los últimos 2 minutos de cualquier período, el reloj también se detiene después de cada canasta anotada para conservar el tiempo efectivo de juego.", 
                     "Art. 8.3 — El reloj del partido deberá detenerse cada vez que el silbato del árbitro suene mientras el balón está en juego. El reloj del partido no se pondrá en marcha hasta que el balón sea tocado en el terreno de juego por un jugador que participe en el juego.", 
-                    listOf("Reloj para con cada pito", "Últimos 2 min: para tras canasta", "Solo tiempo de balón vivo"), true)
+                    listOf("Reloj para con cada pito", "Últimos 2 min: para tras canasta", "Solo tiempo de balón vivo"))
                 // Add more articles for other chapters...
             )
             repository.syncArticles(articles)

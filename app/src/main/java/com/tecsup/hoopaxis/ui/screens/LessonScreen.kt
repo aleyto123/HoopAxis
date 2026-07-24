@@ -29,8 +29,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.tecsup.hoopaxis.HoopAxisApplication
 import com.tecsup.hoopaxis.data.model.Article
-import com.tecsup.hoopaxis.data.repository.UserRepository
-import com.tecsup.hoopaxis.ui.components.AdBannerComponent
 import com.tecsup.hoopaxis.ui.theme.AppColors
 import com.tecsup.hoopaxis.viewmodel.DashboardViewModel
 import kotlinx.coroutines.delay
@@ -52,7 +50,6 @@ fun LessonScreen(
 
     var article by remember { mutableStateOf<Article?>(null) }
     val ruleColor = Color(android.graphics.Color.parseColor("#${ruleColorHex ?: "C96BFF"}"))
-    val isPro = UserRepository.isProUser
     var officialTextState by remember { mutableStateOf(OfficialState.IDLE) }
     
     val scrollState = rememberScrollState()
@@ -120,14 +117,9 @@ fun LessonScreen(
                     // FIBA TOGGLE BUTTON
                     FibaToggleButton(
                         state = officialTextState,
-                        isPro = isPro,
                         ruleColor = ruleColor,
                         onToggle = {
-                            if (isPro) {
-                                officialTextState = if (officialTextState == OfficialState.SHOWN) OfficialState.IDLE else OfficialState.LOADING
-                            } else {
-                                navController.navigate("pro_screen")
-                            }
+                            officialTextState = if (officialTextState == OfficialState.SHOWN) OfficialState.IDLE else OfficialState.LOADING
                         }
                     )
 
@@ -141,11 +133,6 @@ fun LessonScreen(
                     // OFFICIAL TEXT CARD
                     AnimatedVisibility(visible = officialTextState == OfficialState.SHOWN) {
                         OfficialTextCard(ruleColor = ruleColor, article = art)
-                    }
-
-                    if (!isPro) {
-                        Spacer(modifier = Modifier.height(24.dp))
-                        AdBannerComponent(onClick = { navController.navigate("pro_screen") })
                     }
 
                     Spacer(modifier = Modifier.height(32.dp))
@@ -260,7 +247,6 @@ fun KeyPoint(text: String, color: Color) {
 @Composable
 fun FibaToggleButton(
     state: OfficialState,
-    isPro: Boolean,
     ruleColor: Color,
     onToggle: () -> Unit
 ) {
@@ -302,13 +288,13 @@ fun FibaToggleButton(
                 modifier = Modifier
                     .size(36.dp)
                     .clip(RoundedCornerShape(10.dp))
-                    .background(if (!isPro) Color(0xFFFFD166).copy(alpha = 0.2f) else ruleColor.copy(alpha = 0.2f)),
+                    .background(ruleColor.copy(alpha = 0.2f)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = if (!isPro) Icons.Default.Lock else Icons.Default.Description,
+                    imageVector = Icons.Default.Description,
                     contentDescription = null,
-                    tint = if (!isPro) Color(0xFFFFD166) else ruleColor,
+                    tint = ruleColor,
                     modifier = Modifier.size(18.dp)
                 )
             }
@@ -318,31 +304,26 @@ fun FibaToggleButton(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = if (state == OfficialState.SHOWN) "Ocultar Artículo Oficial" else "Ver Artículo Oficial FIBA",
-                    color = if (isPro) ruleColor else Color(0xFFFFD166),
+                    color = ruleColor,
                     fontWeight = FontWeight.Black,
                     fontSize = 14.sp
                 )
                 Text(
                     text = when {
-                        !isPro -> "Solo usuarios Pro · Texto legal FIBA 2026"
-                        state == OfficialState.IDLE -> "Consultar texto oficial bajo demanda"
-                        else -> "Recuperado de base de datos FIBA ✓"
+                        state == OfficialState.IDLE -> "Consultar texto oficial"
+                        else -> "Texto oficial verificado ✓"
                     },
                     color = if (state == OfficialState.SHOWN) ruleColor else Color.White.copy(alpha = 0.38f),
                     fontSize = 10.sp
                 )
             }
 
-            if (!isPro) {
-                Icon(Icons.Default.Star, null, tint = Color(0xFFFFD166), modifier = Modifier.size(20.dp))
-            } else {
-                Icon(
-                    imageVector = Icons.Default.KeyboardArrowDown,
-                    null,
-                    tint = ruleColor,
-                    modifier = Modifier.rotate(rotation)
-                )
-            }
+            Icon(
+                imageVector = Icons.Default.KeyboardArrowDown,
+                null,
+                tint = ruleColor,
+                modifier = Modifier.rotate(rotation)
+            )
         }
     }
 }
@@ -451,9 +432,9 @@ fun OfficialTextCard(ruleColor: Color, article: Article) {
             HorizontalDivider(modifier = Modifier.padding(top = 20.dp, bottom = 8.dp), color = Color.White.copy(alpha = 0.1f))
 
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.Lock, null, tint = Color.White.copy(alpha = 0.2f), modifier = Modifier.size(12.dp))
+                Icon(Icons.Default.VerifiedUser, null, tint = Color.White.copy(alpha = 0.2f), modifier = Modifier.size(12.dp))
                 Spacer(modifier = Modifier.width(6.dp))
-                Text("Protegido · FIBA Official Rules 2026", color = Color.White.copy(alpha = 0.22f), fontSize = 9.sp)
+                Text("Contenido Oficial · FIBA Rules 2026", color = Color.White.copy(alpha = 0.22f), fontSize = 9.sp)
             }
         }
     }
