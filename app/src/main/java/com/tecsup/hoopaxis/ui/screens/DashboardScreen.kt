@@ -125,38 +125,18 @@ fun DashboardScreen(
 
 @Composable
 fun Header(userName: String) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = "Buenos días",
+            style = MaterialTheme.typography.bodyMedium
+        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = "Buenos días",
-                style = MaterialTheme.typography.bodyMedium
+                text = userName,
+                style = MaterialTheme.typography.displayLarge
             )
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = userName,
-                    style = MaterialTheme.typography.displayLarge
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "🏀", fontSize = 28.sp)
-            }
-        }
-        IconButton(
-            onClick = { },
-            modifier = Modifier
-                .size(48.dp)
-                .clip(CircleShape)
-                .background(Color.White.copy(alpha = 0.1f))
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.Notifications,
-                contentDescription = "Notificaciones",
-                tint = Color.White,
-                modifier = Modifier.size(24.dp)
-            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(text = "🏀", fontSize = 28.sp)
         }
     }
 }
@@ -166,7 +146,7 @@ fun ProgressCard() {
     GlassCard(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.Top,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Column(modifier = Modifier.weight(1f)) {
@@ -185,14 +165,20 @@ fun ProgressCard() {
                     text = "3 de 16 capítulos completados",
                     style = MaterialTheme.typography.bodyMedium
                 )
-                Spacer(modifier = Modifier.height(20.dp))
-                Row {
+                Spacer(modifier = Modifier.height(16.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Start,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     StatusBadge(text = "3 COMPLETADOS", color = AppColors.Green, icon = Icons.Default.Check)
-                    Spacer(modifier = Modifier.width(10.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
                     StatusBadge(text = "4 EN CURSO", color = AppColors.Gold, icon = Icons.Default.Pause)
                 }
             }
-            CircularProgress(progress = 0.31f, categoryColor = AppColors.Purple)
+            Box(modifier = Modifier.padding(top = 10.dp, start = 8.dp)) {
+                CircularProgress(progress = 0.31f, categoryColor = AppColors.Purple, size = 64.dp)
+            }
         }
     }
 }
@@ -203,10 +189,13 @@ fun StatusBadge(text: String, color: Color, icon: ImageVector) {
         modifier = Modifier
             .background(color.copy(alpha = 0.18f), RoundedCornerShape(50))
             .border(1.dp, color.copy(alpha = 0.4f), RoundedCornerShape(50))
-            .padding(horizontal = 10.dp, vertical = 4.dp),
+            .padding(horizontal = 8.dp, vertical = 4.dp),
         contentAlignment = Alignment.Center
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
@@ -217,9 +206,11 @@ fun StatusBadge(text: String, color: Color, icon: ImageVector) {
             Text(
                 text = text.uppercase(),
                 color = color,
-                fontSize = 10.sp,
+                fontSize = 9.sp,
                 fontWeight = androidx.compose.ui.text.font.FontWeight.Black,
-                letterSpacing = 1.5.sp
+                letterSpacing = 0.5.sp,
+                maxLines = 1,
+                softWrap = false
             )
         }
     }
@@ -281,7 +272,7 @@ fun CategoryCard(
 ) {
     GlassCard(
         modifier = modifier
-            .height(160.dp)
+            .height(175.dp)
             .clickable { onCategoryClick(rule.id) },
         categoryColor = categoryColor
     ) {
