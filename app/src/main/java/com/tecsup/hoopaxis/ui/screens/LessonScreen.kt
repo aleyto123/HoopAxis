@@ -231,6 +231,16 @@ fun ParaphraseCard(ruleColor: Color, article: Article) {
                     KeyPoint(text = point, color = ruleColor)
                 }
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = "Esta es una explicación simplificada. Para conocer la redacción oficial, consulta el artículo de la FIBA.",
+                color = Color.White.copy(alpha = 0.45f),
+                fontSize = 11.sp,
+                fontStyle = FontStyle.Italic,
+                lineHeight = 16.sp
+            )
         }
     }
 }
