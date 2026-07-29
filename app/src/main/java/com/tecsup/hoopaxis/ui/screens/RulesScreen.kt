@@ -35,7 +35,7 @@ fun RulesScreen(
     onNavigateToDetail: (String) -> Unit = {},
     onNavigateToHome: () -> Unit = {},
     onNavigateToRules: () -> Unit = {},
-    onNavigateToChapters: () -> Unit = {},
+    onNavigateToArticles: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {},
     onNavigateToAdmin: () -> Unit = {}
 ) {
@@ -53,7 +53,7 @@ fun RulesScreen(
                 currentRoute = "reglas",
                 onHomeClick = onNavigateToHome,
                 onRulesClick = onNavigateToRules,
-                onChaptersClick = onNavigateToChapters,
+                onArticlesClick = onNavigateToArticles,
                 onProfileClick = onNavigateToProfile
             ) 
         },
@@ -81,7 +81,7 @@ fun RulesScreen(
             )
             
             Text(
-                text = "Selecciona una regla para ver sus capítulos",
+                text = "Selecciona una regla para ver sus artículos",
                 style = MaterialTheme.typography.bodyMedium
             )
 
@@ -162,7 +162,7 @@ fun RuleVerticalCard(rule: Rule, onClick: () -> Unit) {
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "${rule.chaptersCount} capítulos",
+                    text = "${rule.chaptersCount} artículos",
                     color = color,
                     style = MaterialTheme.typography.labelSmall,
                     modifier = Modifier

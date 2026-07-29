@@ -128,7 +128,7 @@ fun LoginScreen(
                 style = MaterialTheme.typography.displayLarge
             )
             Text(
-                text = "Reglamento Oficial · Plataforma Educativa",
+                text = "Reglamento FIBA · Plataforma Educativa",
                 style = MaterialTheme.typography.bodyMedium
             )
 

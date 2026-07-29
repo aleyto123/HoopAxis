@@ -306,7 +306,7 @@ fun ArticleDialog(article: Article?, chapters: List<Chapter>, onDismiss: () -> U
                 TextField(value = number, onValueChange = { number = it }, label = { Text("Número (Ej: Art. 1)") })
                 TextField(value = title, onValueChange = { title = it }, label = { Text("Título") })
                 TextField(value = paraphrase, onValueChange = { paraphrase = it }, label = { Text("Parafraseo") }, modifier = Modifier.height(100.dp))
-                TextField(value = officialText, onValueChange = { officialText = it }, label = { Text("Texto Oficial") }, modifier = Modifier.height(100.dp))
+                TextField(value = officialText, onValueChange = { officialText = it }, label = { Text("Texto") }, modifier = Modifier.height(100.dp))
                 TextField(value = keyPointsStr, onValueChange = { keyPointsStr = it }, label = { Text("Puntos Clave (uno por línea)") }, modifier = Modifier.height(100.dp))
             }
         },
@@ -317,6 +317,7 @@ fun ArticleDialog(article: Article?, chapters: List<Chapter>, onDismiss: () -> U
                     chapterId = chapterId,
                     title = title,
                     articleNumber = number,
+                    sortOrder = try { number.filter { it.isDigit() }.toInt() } catch (_: Exception) { 0 },
                     paraphrase = paraphrase,
                     officialText = officialText,
                     keyPoints = keyPointsStr.split("\n").filter { it.isNotBlank() },

@@ -29,7 +29,7 @@ fun BottomNavBar(
     currentRoute: String,
     onHomeClick: () -> Unit = {},
     onRulesClick: () -> Unit = {},
-    onChaptersClick: () -> Unit = {},
+    onArticlesClick: () -> Unit = {},
     onProfileClick: () -> Unit = {}
 ) {
     Box(
@@ -50,7 +50,7 @@ fun BottomNavBar(
                 val navItems = listOf(
                     NavigationItem("inicio", "Inicio", Icons.Rounded.Home, onHomeClick),
                     NavigationItem("reglas", "Reglas", Icons.AutoMirrored.Rounded.MenuBook, onRulesClick),
-                    NavigationItem("capitulos", "Capítulos", Icons.Rounded.Description, onChaptersClick),
+                    NavigationItem("articulos", "Artículos", Icons.Rounded.Description, onArticlesClick),
                     NavigationItem("perfil", "Perfil", Icons.Rounded.Person, onProfileClick)
                 )
 

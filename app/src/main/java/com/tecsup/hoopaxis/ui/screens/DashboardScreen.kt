@@ -11,9 +11,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -24,23 +22,26 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.tecsup.hoopaxis.HoopAxisApplication
+import com.tecsup.hoopaxis.data.model.Article
 import com.tecsup.hoopaxis.data.model.Rule
 import com.tecsup.hoopaxis.ui.components.BottomNavBar
 import com.tecsup.hoopaxis.ui.components.CircularProgress
 import com.tecsup.hoopaxis.ui.components.GlassCard
 import com.tecsup.hoopaxis.ui.theme.*
 import com.tecsup.hoopaxis.viewmodel.DashboardViewModel
+import com.tecsup.hoopaxis.viewmodel.DashboardUiState
 
 @Composable
 fun DashboardScreen(
     onNavigateToDetail: (String) -> Unit = {},
     onNavigateToHome: () -> Unit = {},
     onNavigateToRules: () -> Unit = {},
-    onNavigateToChapters: () -> Unit = {},
+    onNavigateToArticles: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {},
     onNavigateToAdmin: () -> Unit = {},
     onNavigateToChapterLessonList: (String, String, String) -> Unit = { _, _, _ -> }
@@ -59,7 +60,7 @@ fun DashboardScreen(
                 currentRoute = "inicio",
                 onHomeClick = onNavigateToHome,
                 onRulesClick = onNavigateToRules,
-                onChaptersClick = onNavigateToChapters,
+                onArticlesClick = onNavigateToArticles,
                 onProfileClick = onNavigateToProfile
             ) 
         },
@@ -97,7 +98,7 @@ fun DashboardScreen(
             }
             
             Spacer(modifier = Modifier.height(24.dp))
-            ProgressCard()
+            ProgressCard(uiState)
             Spacer(modifier = Modifier.height(24.dp))
             CategorySection(
                 rules = uiState.rules,
@@ -106,17 +107,17 @@ fun DashboardScreen(
             )
             Spacer(modifier = Modifier.height(32.dp))
             ContinueStudyingSection(
-                chapters = uiState.allChapters.filter { it.progress > 0 && it.progress < 1 }.take(3),
+                articles = uiState.allArticles.filter { it.progress > 0 && it.progress < 1 }.take(3),
                 rules = uiState.rules,
-                onChapterClick = { chapter ->
-                    val rule = uiState.rules.find { it.id == chapter.ruleId }
+                onArticleClick = { article ->
+                    val rule = uiState.rules.find { it.id == article.ruleId }
                     onNavigateToChapterLessonList(
-                        chapter.id, 
-                        chapter.title, 
+                        article.id, 
+                        article.title, 
                         rule?.color?.removePrefix("#") ?: "C96BFF"
                     )
                 },
-                onViewAllClick = onNavigateToChapters
+                onViewAllClick = onNavigateToArticles
             )
             Spacer(modifier = Modifier.height(32.dp))
         }
@@ -142,7 +143,7 @@ fun Header(userName: String) {
 }
 
 @Composable
-fun ProgressCard() {
+fun ProgressCard(uiState: DashboardUiState) {
     GlassCard(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -161,8 +162,9 @@ fun ProgressCard() {
                     text = "Reglamento FIBA 2026",
                     style = MaterialTheme.typography.headlineMedium
                 )
+                val completedArticles = uiState.allArticles.count { it.isCompleted }
                 Text(
-                    text = "3 de 16 capítulos completados",
+                    text = "$completedArticles de 50 artículos completados",
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Spacer(modifier = Modifier.height(16.dp))
@@ -171,13 +173,16 @@ fun ProgressCard() {
                     horizontalArrangement = Arrangement.Start,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    StatusBadge(text = "3 COMPLETADOS", color = AppColors.Green, icon = Icons.Default.Check)
+                    StatusBadge(text = "$completedArticles COMPLETADOS", color = AppColors.Green, icon = Icons.Default.Check)
+                    val inProgress = uiState.allArticles.count { it.progress > 0 && it.progress < 1 }
                     Spacer(modifier = Modifier.width(6.dp))
-                    StatusBadge(text = "4 EN CURSO", color = AppColors.Gold, icon = Icons.Default.Pause)
+                    StatusBadge(text = "$inProgress EN CURSO", color = AppColors.Gold, icon = Icons.Default.Pause)
                 }
             }
             Box(modifier = Modifier.padding(top = 10.dp, start = 8.dp)) {
-                CircularProgress(progress = 0.31f, categoryColor = AppColors.Purple, size = 64.dp)
+                val overallProgress = if (uiState.allArticles.isEmpty()) 0f 
+                                      else uiState.allArticles.sumOf { it.progress.toDouble() }.toFloat() / uiState.allArticles.size
+                CircularProgress(progress = overallProgress, categoryColor = AppColors.Purple, size = 64.dp)
             }
         }
     }
@@ -207,7 +212,7 @@ fun StatusBadge(text: String, color: Color, icon: ImageVector) {
                 text = text.uppercase(),
                 color = color,
                 fontSize = 9.sp,
-                fontWeight = androidx.compose.ui.text.font.FontWeight.Black,
+                fontWeight = FontWeight.Black,
                 letterSpacing = 0.5.sp,
                 maxLines = 1,
                 softWrap = false
@@ -235,7 +240,7 @@ fun CategorySection(
                 color = AppColors.TextSecondary
             )
             TextButton(onClick = onViewAllClick) {
-                Text(text = "Ver todas →", color = AppColors.Purple, fontSize = 14.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+                Text(text = "Ver todas →", color = AppColors.Purple, fontSize = 14.sp, fontWeight = FontWeight.Bold)
             }
         }
         Spacer(modifier = Modifier.height(14.dp))
@@ -306,7 +311,7 @@ fun CategoryCard(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "${rule.chaptersCount} capítulos",
+                    text = "${rule.chaptersCount} artículos",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
@@ -316,9 +321,9 @@ fun CategoryCard(
 
 @Composable
 fun ContinueStudyingSection(
-    chapters: List<com.tecsup.hoopaxis.data.model.Chapter>,
+    articles: List<Article>,
     rules: List<Rule>,
-    onChapterClick: (com.tecsup.hoopaxis.data.model.Chapter) -> Unit,
+    onArticleClick: (Article) -> Unit,
     onViewAllClick: () -> Unit
 ) {
     Column {
@@ -334,15 +339,15 @@ fun ContinueStudyingSection(
                 letterSpacing = 1.2.sp
             )
             TextButton(onClick = onViewAllClick) {
-                Text(text = "Todos →", color = AppColors.Purple, fontSize = 14.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+                Text(text = "Todos →", color = AppColors.Purple, fontSize = 14.sp, fontWeight = FontWeight.Bold)
             }
         }
         Spacer(modifier = Modifier.height(14.dp))
 
-        if (chapters.isEmpty()) {
+        if (articles.isEmpty()) {
             GlassCard(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    text = "Aún no has empezado ningún capítulo. ¡Comienza ahora!",
+                    text = "Aún no has empezado ningún artículo. ¡Comienza ahora!",
                     color = Color.White.copy(alpha = 0.6f),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.fillMaxWidth(),
@@ -350,13 +355,13 @@ fun ContinueStudyingSection(
                 )
             }
         } else {
-            chapters.forEach { chapter ->
-                val rule = rules.find { it.id == chapter.ruleId }
-                ContinueChapterCard(
-                    chapter = chapter,
+            articles.forEach { article ->
+                val rule = rules.find { it.id == article.ruleId }
+                ContinueArticleCard(
+                    article = article,
                     ruleName = rule?.title ?: "",
                     ruleColor = Color(android.graphics.Color.parseColor(rule?.color ?: "#C96BFF")),
-                    onClick = { onChapterClick(chapter) }
+                    onClick = { onArticleClick(article) }
                 )
                 Spacer(modifier = Modifier.height(12.dp))
             }
@@ -365,8 +370,8 @@ fun ContinueStudyingSection(
 }
 
 @Composable
-fun ContinueChapterCard(
-    chapter: com.tecsup.hoopaxis.data.model.Chapter,
+fun ContinueArticleCard(
+    article: Article,
     ruleName: String,
     ruleColor: Color,
     onClick: () -> Unit
@@ -389,12 +394,12 @@ fun ContinueChapterCard(
                         .background(Color.White.copy(alpha = 0.05f)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = chapter.emoji, fontSize = 20.sp)
+                    Text(text = article.emoji, fontSize = 20.sp)
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 Column {
                     Text(
-                        text = "Cap. ${chapter.number} — ${chapter.title}",
+                        text = "${article.articleNumber} — ${article.title}",
                         style = MaterialTheme.typography.bodyLarge,
                         color = Color.White,
                         maxLines = 1,
@@ -407,8 +412,7 @@ fun ContinueChapterCard(
                     )
                 }
             }
-            CircularProgress(progress = chapter.progress, categoryColor = ruleColor, size = 44.dp)
+            CircularProgress(progress = article.progress, categoryColor = ruleColor, size = 44.dp)
         }
     }
 }
-

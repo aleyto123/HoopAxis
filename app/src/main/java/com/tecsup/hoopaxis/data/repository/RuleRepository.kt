@@ -13,6 +13,8 @@ class RuleRepository(
     private val dao: HoopAxisDao,
     private val remote: FirebaseDataSource
 ) {
+    private var hasSyncedThisSession = false
+
     val currentUser: Flow<User?> = dao.getCurrentUser()
     val allRules: Flow<List<Rule>> = dao.getAllRules()
     val allChapters: Flow<List<Chapter>> = dao.getAllChapters()
@@ -25,6 +27,11 @@ class RuleRepository(
 
     suspend fun logout() {
         dao.logout()
+    }
+
+    suspend fun clearData() {
+        dao.clearRules()
+        dao.clearArticles()
     }
 
     // Admin CRUD Operations (Local + Remote)
@@ -129,7 +136,9 @@ class RuleRepository(
     }
 
     // Sync from Firebase to Local
-    suspend fun syncFromRemote() {
+    suspend fun syncFromRemote(force: Boolean = false) {
+        if (hasSyncedThisSession && !force) return
+        
         try {
             val rules = remote.getRules()
             if (rules.isNotEmpty()) dao.insertRules(rules)
@@ -142,9 +151,10 @@ class RuleRepository(
 
             val questions = remote.getQuizQuestions()
             if (questions.isNotEmpty()) {
-                // We need an insert method for multiple quiz questions
                 questions.forEach { dao.insertQuizQuestion(it) }
             }
+            
+            hasSyncedThisSession = true
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -156,6 +166,8 @@ class RuleRepository(
     }
 
     fun getChaptersByRule(ruleId: String): Flow<List<Chapter>> = dao.getChaptersByRule(ruleId)
+
+    fun getArticlesByRule(ruleId: String): Flow<List<Article>> = dao.getArticlesByRule(ruleId)
 
     suspend fun syncChapters(chapters: List<Chapter>) {
         dao.insertChapters(chapters)

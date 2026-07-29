@@ -75,7 +75,7 @@ fun LessonScreen(
                     title = {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                text = "Artículo Oficial",
+                                text = "Artículo",
                                 color = Color.White.copy(alpha = 0.6f),
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold
@@ -148,10 +148,29 @@ fun LessonScreen(
                                     colors = listOf(AppColors.Purple, AppColors.Pink)
                                 )
                             )
-                            .clickable { navController.popBackStack() }, 
+                            .clickable { 
+                                // Lógica para ir al siguiente artículo
+                                val currentNum = art.sortOrder
+                                if (currentNum < 50) {
+                                    val nextId = "a${currentNum + 1}"
+                                    // Buscamos el color del siguiente artículo (usualmente el mismo o el de la siguiente regla)
+                                    // Para simplificar, navegamos y el LessonScreen cargará el color correcto desde el ID
+                                    navController.navigate("lesson/$nextId/$ruleColorHex") {
+                                        // Evitamos acumular pantallas en el backstack
+                                        popUpTo("lesson/${art.id}/$ruleColorHex") { inclusive = true }
+                                    }
+                                } else {
+                                    // Si es el último, volvemos atrás
+                                    navController.popBackStack()
+                                }
+                            }, 
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("Siguiente lección →", color = Color.White, fontWeight = FontWeight.Black)
+                        Text(
+                            text = if (art.sortOrder < 50) "Siguiente lección →" else "Finalizar lectura", 
+                            color = Color.White, 
+                            fontWeight = FontWeight.Black
+                        )
                     }
                 }
 
@@ -235,7 +254,7 @@ fun ParaphraseCard(ruleColor: Color, article: Article) {
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "Esta es una explicación simplificada. Para conocer la redacción oficial, consulta el artículo de la FIBA.",
+                text = "Esta es una explicación simplificada. Para conocer la redacción FIBA, consulta el artículo correspondiente.",
                 color = Color.White.copy(alpha = 0.45f),
                 fontSize = 11.sp,
                 fontStyle = FontStyle.Italic,
@@ -313,15 +332,15 @@ fun FibaToggleButton(
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = if (state == OfficialState.SHOWN) "Ocultar Artículo Oficial" else "Ver Artículo Oficial FIBA",
+                    text = if (state == OfficialState.SHOWN) "Ocultar Texto" else "Ver Texto FIBA",
                     color = ruleColor,
                     fontWeight = FontWeight.Black,
                     fontSize = 14.sp
                 )
                 Text(
                     text = when {
-                        state == OfficialState.IDLE -> "Consultar texto oficial"
-                        else -> "Texto oficial verificado ✓"
+                        state == OfficialState.IDLE -> "Consultar texto"
+                        else -> "Texto verificado ✓"
                     },
                     color = if (state == OfficialState.SHOWN) ruleColor else Color.White.copy(alpha = 0.38f),
                     fontSize = 10.sp
@@ -359,7 +378,7 @@ fun LoadingOfficialDb(ruleColor: Color) {
             CircularProgressIndicator(color = ruleColor, strokeWidth = 2.dp, modifier = Modifier.size(28.dp))
             Spacer(modifier = Modifier.height(12.dp))
             Text("CONSULTANDO BASE DE DATOS FIBA", color = ruleColor, fontSize = 11.sp, fontWeight = FontWeight.Black)
-            Text("Recuperando artículo oficial…", color = Color.White.copy(alpha = 0.4f), fontSize = 9.sp)
+            Text("Recuperando texto…", color = Color.White.copy(alpha = 0.4f), fontSize = 9.sp)
             Spacer(modifier = Modifier.height(12.dp))
             LinearProgressIndicator(
                 progress = { progress },
@@ -396,7 +415,7 @@ fun OfficialTextCard(ruleColor: Color, article: Article) {
                 }
                 Spacer(modifier = Modifier.width(10.dp))
                 Column {
-                    Text("REGLAMENTO OFICIAL FIBA 2026", color = ruleColor, fontSize = 10.sp, fontWeight = FontWeight.Black)
+                    Text("REGLAMENTO FIBA 2026", color = ruleColor, fontSize = 10.sp, fontWeight = FontWeight.Black)
                     Text("Texto recuperado · Solo lectura", color = Color.White.copy(alpha = 0.35f), fontSize = 9.sp)
                 }
                 Spacer(modifier = Modifier.weight(1f))
@@ -420,7 +439,7 @@ fun OfficialTextCard(ruleColor: Color, article: Article) {
                     Icon(Icons.Default.Info, null, tint = Color(0xFFFFD166), modifier = Modifier.size(11.dp))
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        "Este texto es una copia oficial protegida para consulta legal.",
+                        "Este texto es una copia protegida para consulta legal.",
                         color = Color.White.copy(alpha = 0.72f),
                         fontSize = 9.sp,
                         fontStyle = FontStyle.Italic
@@ -444,7 +463,7 @@ fun OfficialTextCard(ruleColor: Color, article: Article) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Default.VerifiedUser, null, tint = Color.White.copy(alpha = 0.2f), modifier = Modifier.size(12.dp))
                 Spacer(modifier = Modifier.width(6.dp))
-                Text("Contenido Oficial · FIBA Rules 2026", color = Color.White.copy(alpha = 0.22f), fontSize = 9.sp)
+                Text("Contenido · FIBA Rules 2026", color = Color.White.copy(alpha = 0.22f), fontSize = 9.sp)
             }
         }
     }

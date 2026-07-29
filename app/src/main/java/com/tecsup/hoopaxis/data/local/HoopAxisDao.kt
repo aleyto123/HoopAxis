@@ -54,11 +54,13 @@ interface HoopAxisDao {
     @Delete
     suspend fun deleteChapter(chapter: Chapter)
 
-    // Artículos
-    @Query("SELECT * FROM articulos")
+    @Query("SELECT * FROM articulos WHERE ruleId = :ruleId ORDER BY sortOrder ASC")
+    fun getArticlesByRule(ruleId: String): Flow<List<Article>>
+
+    @Query("SELECT * FROM articulos ORDER BY sortOrder ASC")
     fun getAllArticles(): Flow<List<Article>>
 
-    @Query("SELECT * FROM articulos WHERE chapterId = :chapterId")
+    @Query("SELECT * FROM articulos WHERE chapterId = :chapterId ORDER BY sortOrder ASC")
     fun getArticlesByChapter(chapterId: String): Flow<List<Article>>
 
     @Query("SELECT * FROM articulos WHERE id = :articleId")
@@ -75,6 +77,12 @@ interface HoopAxisDao {
 
     @Delete
     suspend fun deleteArticle(article: Article)
+
+    @Query("DELETE FROM reglas")
+    suspend fun clearRules()
+
+    @Query("DELETE FROM articulos")
+    suspend fun clearArticles()
 
     // Quiz Questions
     @Query("SELECT * FROM quiz_questions")

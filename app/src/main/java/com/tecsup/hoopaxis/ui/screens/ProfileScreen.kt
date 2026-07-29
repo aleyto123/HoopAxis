@@ -39,7 +39,7 @@ import com.tecsup.hoopaxis.viewmodel.DashboardViewModel
 fun ProfileScreen(
     onNavigateToHome: () -> Unit = {},
     onNavigateToRules: () -> Unit = {},
-    onNavigateToChapters: () -> Unit = {},
+    onNavigateToArticles: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {},
     onNavigateToAdmin: () -> Unit = {},
     onLogout: () -> Unit = {}
@@ -99,7 +99,7 @@ fun ProfileScreen(
                 currentRoute = "perfil",
                 onHomeClick = onNavigateToHome,
                 onRulesClick = onNavigateToRules,
-                onChaptersClick = onNavigateToChapters,
+                onArticlesClick = onNavigateToArticles,
                 onProfileClick = onNavigateToProfile
             ) 
         },
@@ -245,10 +245,11 @@ fun ProfileScreen(
 
             // Stats Grid
             Row(modifier = Modifier.fillMaxWidth()) {
+                val completedArticles = uiState.allArticles.count { it.isCompleted }
                 StatCard(
                     icon = Icons.Rounded.MenuBook,
-                    title = "3/16",
-                    subtitle = "Capítulos completados",
+                    title = "$completedArticles/50",
+                    subtitle = "Artículos completados",
                     modifier = Modifier.weight(1f)
                 )
                 Spacer(modifier = Modifier.width(16.dp))

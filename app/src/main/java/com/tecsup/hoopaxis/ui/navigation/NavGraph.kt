@@ -1,6 +1,10 @@
 package com.tecsup.hoopaxis.ui.navigation
 
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -19,8 +23,8 @@ sealed class Screen(val route: String) {
     object Login : Screen("login")
     object Dashboard : Screen("dashboard")
     object Rules : Screen("rules")
-    object Chapters : Screen("chapters/{ruleId}") {
-        fun createRoute(ruleId: String) = "chapters/$ruleId"
+    object Articles : Screen("articulos/{ruleId}") {
+        fun createRoute(ruleId: String) = "articulos/$ruleId"
     }
     object Profile : Screen("profile")
     object RuleDetail : Screen("rule_detail/{ruleId}") {
@@ -60,13 +64,25 @@ fun HoopAxisNavGraph(navController: NavHostController) {
     ) {
         composable(Screen.Splash.route) {
             val auth = remember { com.google.firebase.auth.FirebaseAuth.getInstance() }
+            
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+
+            LaunchedEffect(Unit) {
+                // Sincronización remota única al iniciar la aplicación
+                repository.syncFromRemote()
+            }
+
             LaunchedEffect(user) {
                 if (user != null && user?.isLoggedIn == true) {
                     navController.navigate(Screen.Dashboard.route) {
                         popUpTo(Screen.Splash.route) { inclusive = true }
                     }
                 } else {
-                    // Si Room no tiene usuario, verificamos Firebase para restaurar la sesión
                     val firebaseUser = auth.currentUser
                     if (firebaseUser != null) {
                         val restoredUser = User(
@@ -76,10 +92,8 @@ fun HoopAxisNavGraph(navController: NavHostController) {
                             isLoggedIn = true
                         )
                         repository.login(restoredUser)
-                        // Al guardar en el repositorio, 'user' se actualizará y el LaunchedEffect se disparará de nuevo
                     } else {
-                        // No hay sesión en Firebase tampoco
-                        kotlinx.coroutines.delay(800) // Un poco más de tiempo para el Splash
+                        kotlinx.coroutines.delay(800)
                         if (user == null) {
                             navController.navigate(Screen.Login.route) {
                                 popUpTo(Screen.Splash.route) { inclusive = true }
@@ -90,7 +104,7 @@ fun HoopAxisNavGraph(navController: NavHostController) {
             }
         }
         composable(Screen.Login.route) {
-            com.tecsup.hoopaxis.ui.screens.LoginScreen(
+            LoginScreen(
                 onNavigateToDashboard = {
                     navController.navigate(Screen.Dashboard.route) {
                         popUpTo(Screen.Login.route) { inclusive = true }
@@ -101,7 +115,7 @@ fun HoopAxisNavGraph(navController: NavHostController) {
         composable(Screen.Dashboard.route) {
             DashboardScreen(
                 onNavigateToDetail = { ruleId ->
-                    navController.navigate(Screen.Chapters.createRoute(ruleId))
+                    navController.navigate(Screen.Articles.createRoute(ruleId))
                 },
                 onNavigateToHome = {
                     navController.navigate(Screen.Dashboard.route) {
@@ -111,8 +125,8 @@ fun HoopAxisNavGraph(navController: NavHostController) {
                 onNavigateToRules = {
                     navController.navigate(Screen.Rules.route)
                 },
-                onNavigateToChapters = {
-                    navController.navigate(Screen.Chapters.createRoute("all")) 
+                onNavigateToArticles = {
+                    navController.navigate(Screen.Articles.createRoute("all")) 
                 },
                 onNavigateToProfile = {
                     navController.navigate(Screen.Profile.route)
@@ -120,15 +134,15 @@ fun HoopAxisNavGraph(navController: NavHostController) {
                 onNavigateToAdmin = {
                     navController.navigate(Screen.Admin.route)
                 },
-                onNavigateToChapterLessonList = { chapterId, title, color ->
-                    navController.navigate(Screen.LessonList.createRoute(chapterId, title, color))
+                onNavigateToChapterLessonList = { articleId, _, color ->
+                    navController.navigate(Screen.Lesson.createRoute(articleId, color))
                 }
             )
         }
         composable(Screen.Rules.route) {
             RulesScreen(
                 onNavigateToDetail = { ruleId ->
-                    navController.navigate(Screen.Chapters.createRoute(ruleId))
+                    navController.navigate(Screen.Articles.createRoute(ruleId))
                 },
                 onNavigateToHome = {
                     navController.navigate(Screen.Dashboard.route) {
@@ -140,8 +154,8 @@ fun HoopAxisNavGraph(navController: NavHostController) {
                         popUpTo(Screen.Rules.route) { inclusive = true }
                     }
                 },
-                onNavigateToChapters = {
-                    navController.navigate(Screen.Chapters.createRoute("all"))
+                onNavigateToArticles = {
+                    navController.navigate(Screen.Articles.createRoute("all"))
                 },
                 onNavigateToProfile = {
                     navController.navigate(Screen.Profile.route)
@@ -151,12 +165,12 @@ fun HoopAxisNavGraph(navController: NavHostController) {
                 }
             )
         }
-        composable(Screen.Chapters.route) { backStackEntry ->
+        composable(Screen.Articles.route) { backStackEntry ->
             val ruleId = backStackEntry.arguments?.getString("ruleId")
-            ChaptersScreen(
+            ArticlesScreen(
                 ruleId = ruleId,
-                onNavigateToDetail = { chapterId, title, color ->
-                    navController.navigate(Screen.LessonList.createRoute(chapterId, title, color))
+                onNavigateToDetail = { articleId, _, color ->
+                    navController.navigate(Screen.Lesson.createRoute(articleId, color))
                 },
                 onNavigateToHome = {
                     navController.navigate(Screen.Dashboard.route) {
@@ -166,9 +180,9 @@ fun HoopAxisNavGraph(navController: NavHostController) {
                 onNavigateToRules = {
                     navController.navigate(Screen.Rules.route)
                 },
-                onNavigateToChapters = {
-                    navController.navigate(Screen.Chapters.createRoute("all")) {
-                        popUpTo(Screen.Chapters.route) { inclusive = true }
+                onNavigateToArticles = {
+                    navController.navigate(Screen.Articles.createRoute("all")) {
+                        popUpTo(Screen.Articles.route) { inclusive = true }
                     }
                 },
                 onNavigateToProfile = {
@@ -190,8 +204,8 @@ fun HoopAxisNavGraph(navController: NavHostController) {
                 onNavigateToRules = {
                     navController.navigate(Screen.Rules.route)
                 },
-                onNavigateToChapters = {
-                    navController.navigate(Screen.Chapters.createRoute("all"))
+                onNavigateToArticles = {
+                    navController.navigate(Screen.Articles.createRoute("all"))
                 },
                 onNavigateToProfile = {
                     navController.navigate(Screen.Profile.route) {
@@ -225,23 +239,23 @@ fun HoopAxisNavGraph(navController: NavHostController) {
             val chapterId = backStackEntry.arguments?.getString("chapterId")
             val chapterTitle = backStackEntry.arguments?.getString("chapterTitle")
             val ruleColor = backStackEntry.arguments?.getString("ruleColor")
-            com.tecsup.hoopaxis.ui.screens.LessonListScreen(navController, chapterId, chapterTitle, ruleColor)
+            LessonListScreen(navController, chapterId, chapterTitle, ruleColor)
         }
         
         composable(Screen.Lesson.route) { backStackEntry ->
             val lessonId = backStackEntry.arguments?.getString("lessonId")
             val ruleColor = backStackEntry.arguments?.getString("ruleColor")
-            com.tecsup.hoopaxis.ui.screens.LessonScreen(navController, lessonId, ruleColor)
+            LessonScreen(navController, lessonId, ruleColor)
         }
         
         composable(Screen.Quiz.route) {
-            com.tecsup.hoopaxis.ui.screens.QuizScreen(navController)
+            QuizScreen(navController)
         }
         
         composable(Screen.QuizResults.route) { backStackEntry ->
             val score = backStackEntry.arguments?.getString("score")
             val total = backStackEntry.arguments?.getString("total")
-            com.tecsup.hoopaxis.ui.screens.QuizResultsScreen(navController, score, total)
+            QuizResultsScreen(navController, score, total)
         }
         
         composable(Screen.Admin.route) {
