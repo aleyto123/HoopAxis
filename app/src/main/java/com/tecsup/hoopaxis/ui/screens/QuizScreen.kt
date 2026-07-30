@@ -50,12 +50,63 @@ fun QuizScreen(
     var showResults by remember { mutableStateOf(false) }
     val history = remember { mutableStateListOf<Boolean>() }
 
-    if (questions.isEmpty()) {
+    var isLoading by remember { mutableStateOf(true) }
+
+    LaunchedEffect(questions) {
+        if (allQuestions.isNotEmpty()) {
+            isLoading = false
+        } else {
+            // Damos un tiempo razonable para cargar de la DB local
+            kotlinx.coroutines.delay(1500)
+            isLoading = false
+        }
+    }
+
+    if (isLoading) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 CircularProgressIndicator(color = AppColors.Purple)
                 Spacer(modifier = Modifier.height(16.dp))
                 Text("Cargando evaluación...", color = Color.White)
+            }
+        }
+        return
+    }
+
+    if (questions.isEmpty()) {
+        Box(modifier = Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Icon(Icons.Default.Info, null, tint = AppColors.Gold, modifier = Modifier.size(64.dp))
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    "Evaluación no disponible",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = Color.White,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    "Aún no se han cargado preguntas para este artículo. Puedes continuar con la lectura.",
+                    color = Color.White.copy(alpha = 0.7f),
+                    textAlign = TextAlign.Center,
+                    fontSize = 14.sp
+                )
+                Spacer(modifier = Modifier.height(32.dp))
+                Button(
+                    onClick = { 
+                        // Si no hay evaluación, permitimos avanzar por cortesía
+                        navController.previousBackStackEntry?.savedStateHandle?.set("quiz_passed", true)
+                        navController.popBackStack() 
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = AppColors.Purple),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Text("CONTINUAR A LA SIGUIENTE LECCIÓN", fontWeight = FontWeight.Bold)
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+                TextButton(onClick = { navController.popBackStack() }) {
+                    Text("VOLVER A LA LECTURA", color = Color.White.copy(alpha = 0.6f))
+                }
             }
         }
         return

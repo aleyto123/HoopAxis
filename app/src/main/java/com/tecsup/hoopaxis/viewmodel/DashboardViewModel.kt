@@ -292,7 +292,7 @@ class DashboardViewModel(private val repository: RuleRepository) : ViewModel() {
                     ),
                     correctIndex = 1,
                     explanation = "El reglamento establece que el objetivo es encestar en el aro contrario y defender el propio.",
-                    category = "a1" // Usamos el ID del artículo como categoría para filtrar
+                    category = "a1"
                 ),
                 com.tecsup.hoopaxis.data.model.QuizQuestion(
                     id = "q2",
@@ -322,6 +322,39 @@ class DashboardViewModel(private val repository: RuleRepository) : ViewModel() {
                     correctIndex = 2,
                     explanation = "Obtiene la victoria el conjunto que acumule la mayor cantidad de puntos al finalizar el tiempo reglamentario.",
                     category = "a1"
+                ),
+                // PREGUNTAS PARA EL ARTÍCULO 2
+                com.tecsup.hoopaxis.data.model.QuizQuestion(
+                    id = "q5",
+                    question = "¿Cuáles son las dimensiones principales del terreno de juego?",
+                    options = listOf("26 x 14 metros.", "28 x 15 metros.", "30 x 16 metros.", "32 x 19 metros."),
+                    correctIndex = 1,
+                    explanation = "Las medidas deben ser de 28 metros de longitud por 15 metros de ancho.",
+                    category = "a2"
+                ),
+                com.tecsup.hoopaxis.data.model.QuizQuestion(
+                    id = "q6",
+                    question = "¿Cuál es el ancho de todas las líneas de demarcación en la cancha?",
+                    options = listOf("3 cm.", "5 cm.", "7 cm.", "10 cm."),
+                    correctIndex = 1,
+                    explanation = "Todas las líneas miden 5 cm de ancho.",
+                    category = "a2"
+                ),
+                com.tecsup.hoopaxis.data.model.QuizQuestion(
+                    id = "q7",
+                    question = "¿A qué distancia se fija el arco de 3 puntos desde el punto en el piso bajo el centro del aro?",
+                    options = listOf("6,25 metros.", "6,50 metros.", "6,75 metros.", "7,24 metros."),
+                    correctIndex = 2,
+                    explanation = "El arco de 3 puntos está fijado a 6,75 metros.",
+                    category = "a2"
+                ),
+                com.tecsup.hoopaxis.data.model.QuizQuestion(
+                    id = "q8",
+                    question = "¿Cuántos asientos deben tener las zonas de banquillo fuera del perímetro?",
+                    options = listOf("12 asientos.", "14 asientos.", "16 asientos.", "20 asientos."),
+                    correctIndex = 2,
+                    explanation = "Se delimitan zonas de banquillo acondicionadas con 16 asientos.",
+                    category = "a2"
                 )
             )
 
