@@ -294,7 +294,7 @@ fun ArticleDialog(article: Article?, chapters: List<Chapter>, onDismiss: () -> U
     var number by remember { mutableStateOf(article?.articleNumber ?: "") }
     var chapterId by remember { mutableStateOf(article?.chapterId ?: chapters.firstOrNull()?.id ?: "") }
     var paraphrase by remember { mutableStateOf(article?.paraphrase ?: "") }
-    var officialText by remember { mutableStateOf(article?.officialText ?: "") }
+    var sourceText by remember { mutableStateOf(article?.sourceText ?: "") }
     var keyPointsStr by remember { mutableStateOf(article?.keyPoints?.joinToString("\n") ?: "") }
 
     AlertDialog(
@@ -306,7 +306,7 @@ fun ArticleDialog(article: Article?, chapters: List<Chapter>, onDismiss: () -> U
                 TextField(value = number, onValueChange = { number = it }, label = { Text("Número (Ej: Art. 1)") })
                 TextField(value = title, onValueChange = { title = it }, label = { Text("Título") })
                 TextField(value = paraphrase, onValueChange = { paraphrase = it }, label = { Text("Parafraseo") }, modifier = Modifier.height(100.dp))
-                TextField(value = officialText, onValueChange = { officialText = it }, label = { Text("Texto") }, modifier = Modifier.height(100.dp))
+                TextField(value = sourceText, onValueChange = { sourceText = it }, label = { Text("Texto") }, modifier = Modifier.height(100.dp))
                 TextField(value = keyPointsStr, onValueChange = { keyPointsStr = it }, label = { Text("Puntos Clave (uno por línea)") }, modifier = Modifier.height(100.dp))
             }
         },
@@ -319,7 +319,7 @@ fun ArticleDialog(article: Article?, chapters: List<Chapter>, onDismiss: () -> U
                     articleNumber = number,
                     sortOrder = try { number.filter { it.isDigit() }.toInt() } catch (_: Exception) { 0 },
                     paraphrase = paraphrase,
-                    officialText = officialText,
+                    sourceText = sourceText,
                     keyPoints = keyPointsStr.split("\n").filter { it.isNotBlank() },
                     isCompleted = article?.isCompleted ?: false
                 ))

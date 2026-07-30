@@ -37,7 +37,9 @@ sealed class Screen(val route: String) {
     object Lesson : Screen("lesson/{lessonId}/{ruleColor}") {
         fun createRoute(lessonId: String, ruleColor: String) = "lesson/$lessonId/$ruleColor"
     }
-    object Quiz : Screen("quiz")
+    object Quiz : Screen("quiz/{articleId}") {
+        fun createRoute(articleId: String) = "quiz/$articleId"
+    }
     object QuizResults : Screen("quiz_results/{score}/{total}") {
         fun createRoute(score: Int, total: Int) = "quiz_results/$score/$total"
     }
@@ -248,8 +250,9 @@ fun HoopAxisNavGraph(navController: NavHostController) {
             LessonScreen(navController, lessonId, ruleColor)
         }
         
-        composable(Screen.Quiz.route) {
-            QuizScreen(navController)
+        composable(Screen.Quiz.route) { backStackEntry ->
+            val articleId = backStackEntry.arguments?.getString("articleId")
+            QuizScreen(navController, articleId)
         }
         
         composable(Screen.QuizResults.route) { backStackEntry ->

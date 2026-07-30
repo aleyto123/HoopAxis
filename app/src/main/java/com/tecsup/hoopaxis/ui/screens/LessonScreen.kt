@@ -15,11 +15,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -33,8 +33,6 @@ import com.tecsup.hoopaxis.ui.theme.AppColors
 import com.tecsup.hoopaxis.viewmodel.DashboardViewModel
 import kotlinx.coroutines.delay
 
-enum class OfficialState { IDLE, LOADING, SHOWN }
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LessonScreen(
@@ -43,6 +41,7 @@ fun LessonScreen(
     ruleColorHex: String?
 ) {
     val context = LocalContext.current
+    val uriHandler = LocalUriHandler.current
     val repository = (context.applicationContext as HoopAxisApplication).repository
     val viewModel: DashboardViewModel = viewModel(
         factory = DashboardViewModel.provideFactory(repository)
@@ -50,18 +49,27 @@ fun LessonScreen(
 
     var article by remember { mutableStateOf<Article?>(null) }
     val ruleColor = Color(android.graphics.Color.parseColor("#${ruleColorHex ?: "C96BFF"}"))
-    var officialTextState by remember { mutableStateOf(OfficialState.IDLE) }
     
     val scrollState = rememberScrollState()
+
+    // Flag para saber si el usuario ya pasó el quiz de esta lección
+    val quizPassedState = navController.currentBackStackEntry
+        ?.savedStateHandle
+        ?.getStateFlow("quiz_passed", false)
+        ?.collectAsState()
+    
+    val quizPassed = quizPassedState?.value ?: false
 
     LaunchedEffect(lessonId) {
         lessonId?.let { article = viewModel.getArticle(it) }
     }
 
-    LaunchedEffect(officialTextState) {
-        if (officialTextState == OfficialState.LOADING) {
-            delay(1400)
-            officialTextState = OfficialState.SHOWN
+    LaunchedEffect(quizPassed) {
+        if (quizPassed) {
+            // Si el quiz fue exitoso, podríamos marcar el artículo como completado localmente
+            article?.let {
+                // repository.updateArticle(it.copy(isCompleted = true))
+            }
         }
     }
 
@@ -114,26 +122,13 @@ fun LessonScreen(
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    // FIBA TOGGLE BUTTON
-                    FibaToggleButton(
-                        state = officialTextState,
+                    // FIBA EXTERNAL LINK BUTTON
+                    FibaExternalLinkButton(
                         ruleColor = ruleColor,
-                        onToggle = {
-                            officialTextState = if (officialTextState == OfficialState.SHOWN) OfficialState.IDLE else OfficialState.LOADING
+                        onClick = {
+                            uriHandler.openUri("https://about.fiba.basketball/es/services/resource-hub/downloads")
                         }
                     )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // LOADING STATE
-                    AnimatedVisibility(visible = officialTextState == OfficialState.LOADING) {
-                        LoadingOfficialDb(ruleColor = ruleColor)
-                    }
-
-                    // OFFICIAL TEXT CARD
-                    AnimatedVisibility(visible = officialTextState == OfficialState.SHOWN) {
-                        OfficialTextCard(ruleColor = ruleColor, article = art)
-                    }
 
                     Spacer(modifier = Modifier.height(32.dp))
 
@@ -145,29 +140,33 @@ fun LessonScreen(
                             .clip(RoundedCornerShape(20.dp))
                             .background(
                                 Brush.linearGradient(
-                                    colors = listOf(AppColors.Purple, AppColors.Pink)
+                                    colors = if (quizPassed) listOf(AppColors.Purple, AppColors.Pink)
+                                             else listOf(Color.Gray, Color.DarkGray)
                                 )
                             )
                             .clickable { 
-                                // Lógica para ir al siguiente artículo
-                                val currentNum = art.sortOrder
-                                if (currentNum < 50) {
-                                    val nextId = "a${currentNum + 1}"
-                                    // Buscamos el color del siguiente artículo (usualmente el mismo o el de la siguiente regla)
-                                    // Para simplificar, navegamos y el LessonScreen cargará el color correcto desde el ID
-                                    navController.navigate("lesson/$nextId/$ruleColorHex") {
-                                        // Evitamos acumular pantallas en el backstack
-                                        popUpTo("lesson/${art.id}/$ruleColorHex") { inclusive = true }
+                                if (quizPassed) {
+                                    val currentNum = art.sortOrder
+                                    if (currentNum < 50) {
+                                        val nextId = "a${currentNum + 1}"
+                                        navController.navigate("lesson/$nextId/$ruleColorHex") {
+                                            popUpTo("lesson/${art.id}/$ruleColorHex") { inclusive = true }
+                                        }
+                                    } else {
+                                        navController.popBackStack()
                                     }
                                 } else {
-                                    // Si es el último, volvemos atrás
-                                    navController.popBackStack()
+                                    navController.navigate("quiz/${art.id}")
                                 }
                             }, 
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = if (art.sortOrder < 50) "Siguiente lección →" else "Finalizar lectura", 
+                            text = if (quizPassed) {
+                                if (art.sortOrder < 50) "Siguiente lección →" else "Finalizar lectura"
+                            } else {
+                                "¡Demuestra lo aprendido! 🎯"
+                            },
                             color = Color.White, 
                             fontWeight = FontWeight.Black
                         )
@@ -215,43 +214,51 @@ fun ParaphraseCard(ruleColor: Color, article: Article) {
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-            Text("🏀", fontSize = 40.sp)
+            Text(article.emoji, fontSize = 40.sp)
             Text(article.title, color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Black)
             Text(article.articleNumber, color = ruleColor, fontSize = 12.sp, fontWeight = FontWeight.Bold)
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp), color = Color.White.copy(alpha = 0.08f))
 
-            Text(
-                text = article.paraphrase,
-                color = Color.White.copy(alpha = 0.85f),
-                fontSize = 15.sp,
-                lineHeight = 26.sp,
-                fontWeight = FontWeight.SemiBold
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
+            // SECCIÓN GENERAL: SUB-ARTÍCULOS EN CARDS INDIVIDUALES
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(ruleColor.copy(alpha = 0.10f), RoundedCornerShape(16.dp))
-                    .border(1.dp, ruleColor.copy(alpha = 0.22f), RoundedCornerShape(16.dp))
-                    .padding(12.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text(
-                    "PUNTOS CLAVE",
-                    color = ruleColor,
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.Black,
-                    letterSpacing = 1.5.sp
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                article.keyPoints.forEach { point ->
-                    KeyPoint(text = point, color = ruleColor)
+                article.keyPoints.forEach { sectionText ->
+                    KeyPointCard(text = sectionText, color = ruleColor)
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(28.dp))
+
+            Text(
+                "RESUMEN DE PUNTOS CLAVE",
+                color = ruleColor,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Black,
+                letterSpacing = 1.5.sp,
+                modifier = Modifier.padding(bottom = 12.dp)
+            )
+
+            // TARJETA DE PUNTOS CLAVE CONCISA Y HERMOSA
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(ruleColor.copy(alpha = 0.12f))
+                    .border(1.dp, ruleColor.copy(alpha = 0.25f), RoundedCornerShape(20.dp))
+                    .padding(16.dp)
+            ) {
+                Text(
+                    text = article.paraphrase,
+                    color = Color.White.copy(alpha = 0.95f),
+                    fontSize = 14.sp,
+                    lineHeight = 22.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
 
             Text(
                 text = "Esta es una explicación simplificada. Para conocer la redacción FIBA, consulta el artículo correspondiente.",
@@ -265,51 +272,47 @@ fun ParaphraseCard(ruleColor: Color, article: Article) {
 }
 
 @Composable
-fun KeyPoint(text: String, color: Color) {
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
-        Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(color))
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(text, color = Color.White.copy(alpha = 0.75f), fontSize = 12.sp, fontWeight = FontWeight.Medium)
+fun KeyPointCard(text: String, color: Color) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(color.copy(alpha = 0.07f))
+            .border(1.dp, color.copy(alpha = 0.15f), RoundedCornerShape(16.dp))
+            .padding(14.dp)
+    ) {
+        Row(verticalAlignment = Alignment.Top) {
+            Box(
+                modifier = Modifier
+                    .padding(top = 6.dp)
+                    .size(6.dp)
+                    .clip(CircleShape)
+                    .background(color)
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(
+                text = text,
+                color = Color.White.copy(alpha = 0.85f),
+                fontSize = 13.sp,
+                lineHeight = 20.sp,
+                fontWeight = FontWeight.Medium
+            )
+        }
     }
 }
 
 @Composable
-fun FibaToggleButton(
-    state: OfficialState,
+fun FibaExternalLinkButton(
     ruleColor: Color,
-    onToggle: () -> Unit
+    onClick: () -> Unit
 ) {
-    val bgColor by animateColorAsState(
-        targetValue = when(state) {
-            OfficialState.IDLE -> Color.White.copy(alpha = 0.06f)
-            OfficialState.LOADING -> ruleColor.copy(alpha = 0.12f)
-            OfficialState.SHOWN -> ruleColor.copy(alpha = 0.2f)
-        },
-        animationSpec = tween(300),
-        label = "bgColor"
-    )
-    val borderColor by animateColorAsState(
-        targetValue = when(state) {
-            OfficialState.IDLE -> Color.White.copy(alpha = 0.15f)
-            OfficialState.LOADING -> ruleColor.copy(alpha = 0.35f)
-            OfficialState.SHOWN -> ruleColor.copy(alpha = 0.55f)
-        },
-        animationSpec = tween(300),
-        label = "borderColor"
-    )
-    val rotation by animateFloatAsState(
-        targetValue = if (state == OfficialState.SHOWN) 180f else 0f,
-        animationSpec = tween(300),
-        label = "rotation"
-    )
-
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(20.dp))
-            .background(bgColor)
-            .border(if (state == OfficialState.SHOWN) 1.5.dp else 1.dp, borderColor, RoundedCornerShape(20.dp))
-            .clickable { onToggle() }
+            .background(Color.White.copy(alpha = 0.06f))
+            .border(1.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(20.dp))
+            .clickable { onClick() }
             .padding(horizontal = 14.dp, vertical = 12.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -332,139 +335,24 @@ fun FibaToggleButton(
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = if (state == OfficialState.SHOWN) "Ocultar Texto" else "Ver Texto FIBA",
+                    text = "Consultar Reglamento FIBA",
                     color = ruleColor,
                     fontWeight = FontWeight.Black,
                     fontSize = 14.sp
                 )
                 Text(
-                    text = when {
-                        state == OfficialState.IDLE -> "Consultar texto"
-                        else -> "Texto verificado ✓"
-                    },
-                    color = if (state == OfficialState.SHOWN) ruleColor else Color.White.copy(alpha = 0.38f),
+                    text = "Ver recursos en fiba.basketball",
+                    color = Color.White.copy(alpha = 0.38f),
                     fontSize = 10.sp
                 )
             }
 
             Icon(
-                imageVector = Icons.Default.KeyboardArrowDown,
+                imageVector = Icons.Default.OpenInNew,
                 null,
                 tint = ruleColor,
-                modifier = Modifier.rotate(rotation)
+                modifier = Modifier.size(18.dp)
             )
-        }
-    }
-}
-
-@Composable
-fun LoadingOfficialDb(ruleColor: Color) {
-    val progress by animateFloatAsState(
-        targetValue = 1f,
-        animationSpec = tween(1200, easing = LinearOutSlowInEasing),
-        label = "progress"
-    )
-    
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
-            .background(Color(0xFF0D0520).copy(alpha = 0.65f))
-            .border(1.dp, ruleColor.copy(alpha = 0.35f), RoundedCornerShape(20.dp))
-            .padding(20.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            CircularProgressIndicator(color = ruleColor, strokeWidth = 2.dp, modifier = Modifier.size(28.dp))
-            Spacer(modifier = Modifier.height(12.dp))
-            Text("CONSULTANDO BASE DE DATOS FIBA", color = ruleColor, fontSize = 11.sp, fontWeight = FontWeight.Black)
-            Text("Recuperando texto…", color = Color.White.copy(alpha = 0.4f), fontSize = 9.sp)
-            Spacer(modifier = Modifier.height(12.dp))
-            LinearProgressIndicator(
-                progress = { progress },
-                modifier = Modifier.fillMaxWidth().height(2.dp),
-                color = ruleColor,
-                trackColor = Color.White.copy(alpha = 0.1f)
-            )
-        }
-    }
-}
-
-@Composable
-fun OfficialTextCard(ruleColor: Color, article: Article) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .shadow(0.dp, RoundedCornerShape(20.dp), spotColor = ruleColor.copy(alpha = 0.3f))
-            .clip(RoundedCornerShape(20.dp))
-            .background(
-                Brush.linearGradient(
-                    listOf(Color(0xFF1A0640), Color(0xFF0D1A60))
-                )
-            )
-            .border(1.5.dp, ruleColor.copy(alpha = 0.45f), RoundedCornerShape(20.dp))
-            .padding(20.dp)
-    ) {
-        Column {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier.size(24.dp).clip(RoundedCornerShape(6.dp)).background(ruleColor),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("F", color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Black)
-                }
-                Spacer(modifier = Modifier.width(10.dp))
-                Column {
-                    Text("REGLAMENTO FIBA 2026", color = ruleColor, fontSize = 10.sp, fontWeight = FontWeight.Black)
-                    Text("Texto recuperado · Solo lectura", color = Color.White.copy(alpha = 0.35f), fontSize = 9.sp)
-                }
-                Spacer(modifier = Modifier.weight(1f))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.CheckCircle, null, tint = Color(0xFF50DC78), modifier = Modifier.size(12.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("DB OK", color = Color(0xFF50DC78), fontSize = 10.sp, fontWeight = FontWeight.Bold)
-                }
-            }
-
-            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = ruleColor.copy(alpha = 0.2f))
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color(0xFFFFD166).copy(alpha = 0.08f), RoundedCornerShape(10.dp))
-                    .border(1.dp, Color(0xFFFFD166).copy(alpha = 0.15f), RoundedCornerShape(10.dp))
-                    .padding(8.dp)
-            ) {
-                Row {
-                    Icon(Icons.Default.Info, null, tint = Color(0xFFFFD166), modifier = Modifier.size(11.dp))
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        "Este texto es una copia protegida para consulta legal.",
-                        color = Color.White.copy(alpha = 0.72f),
-                        fontSize = 9.sp,
-                        fontStyle = FontStyle.Italic
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = article.officialText,
-                color = Color.White.copy(alpha = 0.80f),
-                fontSize = 13.sp,
-                fontFamily = FontFamily.Monospace,
-                fontStyle = FontStyle.Italic,
-                lineHeight = 22.sp
-            )
-
-            HorizontalDivider(modifier = Modifier.padding(top = 20.dp, bottom = 8.dp), color = Color.White.copy(alpha = 0.1f))
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.VerifiedUser, null, tint = Color.White.copy(alpha = 0.2f), modifier = Modifier.size(12.dp))
-                Spacer(modifier = Modifier.width(6.dp))
-                Text("Contenido · FIBA Rules 2026", color = Color.White.copy(alpha = 0.22f), fontSize = 9.sp)
-            }
         }
     }
 }

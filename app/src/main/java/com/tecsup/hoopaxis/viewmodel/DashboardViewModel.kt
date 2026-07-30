@@ -226,30 +226,36 @@ class DashboardViewModel(private val repository: RuleRepository) : ViewModel() {
                 }
                 
                 val paraphrase = when (num) {
-                    1 -> "Artículo 1: Definiciones\n1.1 Principio del partido: Es un deporte que enfrenta a dos equipos compuestos por cinco jugadores en pista. El objetivo central es encestar el balón en el aro del equipo contrario e impedir que este anote en el propio. El control del encuentro está a cargo de los árbitros, los auxiliares de mesa y, si lo hubiera, un comisionado.\n1.2 Deberes de los participantes: Los miembros de las delegaciones (jugadores, entrenadores y asistentes) deben acatar las normas y guardar conducta deportiva. Tienen la obligación de notificar de inmediato a los árbitros cualquier falla o descuadre que detecten en el marcador, los relojes o el registro de faltas.\n1.3 Pistas y canastas: La canasta que un equipo ataca es la del oponente; la canasta que defiende es la suya propia.\n1.4 Determinación del ganador: Obtiene la victoria el conjunto que acumule la mayor cantidad de puntos una vez finalizado el tiempo reglamentario de juego."
-                    2 -> "Artículo 2: Terreno de juego\n2.1 Dimensiones principales: El campo debe ser una superficie lisa, dura y libre de obstáculos. Sus medidas deben ser de 28 metros de longitud por 15 metros de ancho, calculadas desde el borde interior de las líneas de límite. Al sumar la zona de seguridad exterior (mínimo 2 metros alrededor), el espacio total de suelo requerido es de al menos 32 metros por 19 metros.\n2.2 División de la cancha:\nPista trasera (propia): Comprende el aro propio, la cara interna del tablero y la sección de cancha delimitada por la línea de fondo posterior, las líneas laterales y el borde de la línea central más cercano a la propia canasta.\nPista delantera (de ataque): Comprende el aro del oponente, la cara interna de su tablero y la sección de cancha delimitada por la línea de fondo rival, las líneas laterales y el borde de la línea central más cercano al aro rival.\n2.3 Demarcaciones y líneas:\nTodas las líneas miden 5 cm de ancho y deben ser de un color uniforme que contraste con el suelo.\nLas líneas perimetrales (bandas y fondos) determinan el límite y no son parte de la zona de juego válida.\nSe deben marcar la línea central, el círculo central, las zonas restringidas (botella), las líneas de tiro libre y el arco de 3 puntos (fijado a 6,75 metros del punto en el piso bajo el centro del aro).\nIncluye los semicírculos de no-carga por falta de ataque bajo los aros y las líneas de saque en la banda opuesta a la mesa de control.\nFuera del perímetro se delimitan las zonas de banquillo, acondicionadas con 16 asientos para el personal autorizado del equipo.\n2.4 Áreas técnicas de control: La mesa de los anotadores y las sillas destinadas a los cambios de jugadores deben ubicarse fuera del terreno de juego sobre una zona elevada o claramente delimitada."
-                    3 -> "Artículo 3: Equipamiento\nElementos obligatorios para la realización del partido:\nUnidades de canasta completas (tableros, aros con sistema abatible o rígido, redes y sus respectivas protecciones de acolchado).\nBalones reglamentarios homologados por la FIBA.\nReloj principal de juego y tablero electrónico indicador del marcador y faltas.\nDispositivo del reloj de tiro (pantallas de 24/14 segundos).\nCronómetro independiente para el control de los tiempos muertos.\nDos señales acústicas potentes e independientes (una para el reloj de juego y otra para el reloj de tiro).\nActa del partido (planilla impreso o sistema digital).\nMarcadores de faltas individuales (números del 1 al 5) e indicadores visuales de faltas colectivas por equipo.\nFlecha de posesión alterna para resolver situaciones de balón retenido.\nSistema de iluminación uniforme que cubra la totalidad del terreno de juego sin generar sombras ni deslumbramiento."
+                    1 -> "• Enfrentamiento 5 vs 5 en pista.\n• Objetivo: Encestar e impedir anotaciones.\n• Cumplir normas y conducta deportiva.\n• Gana el equipo con más puntos."
+                    2 -> "• Superficie lisa y dura de 28x15 metros.\n• División en pista trasera y delantera.\n• Líneas de 5 cm de ancho.\n• Áreas técnicas fuera del terreno."
+                    3 -> "• Canastas y balones homologados.\n• Relojes de juego y de tiro (24/14s).\n• Señales acústicas y acta del partido.\n• Iluminación uniforme sin deslumbramiento."
                     else -> "Información no disponible"
                 }
 
                 val keyPoints = when (num) {
                     1 -> listOf(
-                        "1.1 Principio del partido: Enfrentamiento 5 vs 5 para encestar e impedir anotaciones.",
-                        "1.2 Deberes: Acatar normas, conducta deportiva y reportar fallos técnicos.",
-                        "1.3 Pistas y canastas: Se ataca la canasta oponente y se defiende la propia.",
-                        "1.4 Ganador: El conjunto con más puntos al finalizar el tiempo reglamentario."
+                        "1.1 Principio del partido: Es un deporte que enfrenta a dos equipos compuestos por cinco jugadores en pista. El objetivo central es encestar el balón en el aro del equipo contrario e impedir que este anote en el propio. El control del encuentro está a cargo de los árbitros, los auxiliares de mesa y, si lo hubiera, un comisionado.",
+                        "1.2 Deberes de los participantes: Los miembros de las delegaciones (jugadores, entrenadores y asistentes) deben acatar las normas y guardar conducta deportiva. Tienen la obligación de notificar de inmediato a los árbitros cualquier falla o descuadre que detecten en el marcador, los relojes o el registro de faltas.",
+                        "1.3 Pistas y canastas: La canasta que un equipo ataca es la del oponente; la canasta que defiende es la suya propia.",
+                        "1.4 Determinación del ganador: Obtiene la victoria el conjunto que acumule la mayor cantidad de puntos una vez finalizado el tiempo reglamentario de juego."
                     )
                     2 -> listOf(
-                        "2.1 Dimensiones principales: 28x15 metros (32x19 metros con seguridad).",
-                        "2.2 División: Pista trasera (propia) y pista delantera (ataque).",
-                        "2.3 Demarcaciones: Líneas de 5 cm, arco de 3 puntos a 6,75m y zonas de banquillo.",
-                        "2.4 Áreas técnicas: Mesa de anotadores y sillas de cambios fuera del terreno."
+                        "2.1 Dimensiones principales: El campo debe ser una superficie lisa, dura y libre de obstáculos. Sus medidas deben ser de 28 metros de longitud por 15 metros de ancho, calculadas desde el borde interior de las líneas de límite. Al sumar la zona de seguridad exterior (mínimo 2 metros alrededor), el espacio total de suelo requerido es de al menos 32 metros por 19 metros.",
+                        "2.2 División de la cancha: Pista trasera (propia) y Pista delantera (de ataque) delimitadas por la línea central.",
+                        "2.3 Demarcaciones y líneas: Todas las líneas miden 5 cm de ancho. Incluye el arco de 3 puntos a 6,75 metros y áreas de banquillo.",
+                        "2.4 Áreas técnicas de control: La mesa de los anotadores y las sillas destinadas a los cambios de jugadores deben ubicarse fuera del terreno de juego sobre una zona elevada o claramente delimitada."
                     )
                     3 -> listOf(
-                        "Unidades de canasta, balones homologados y tableros electrónicos.",
-                        "Dispositivos de reloj de tiro y cronómetros de tiempos muertos.",
-                        "Señales acústicas, acta del partido y marcadores de faltas.",
-                        "Flecha de posesión alterna e iluminación uniforme sin sombras."
+                        "Unidades de canasta completas (tableros, aros con sistema abatible o rígido, redes y sus respectivas protecciones de acolchado).",
+                        "Balones reglamentarios homologados por la FIBA.",
+                        "Reloj principal de juego y tablero electrónico indicador del marcador y faltas.",
+                        "Dispositivo del reloj de tiro (pantallas de 24/14 segundos).",
+                        "Cronómetro independiente para el control de los tiempos muertos.",
+                        "Dos señales acústicas potentes e independientes (una para el reloj de juego y otra para el reloj de tiro).",
+                        "Acta del partido (planilla impreso o sistema digital).",
+                        "Marcadores de faltas individuales (números del 1 al 5) e indicadores visuales de faltas colectivas por equipo.",
+                        "Flecha de posesión alterna para resolver situaciones de balón retenido.",
+                        "Sistema de iluminación uniforme que cubra la totalidad del terreno de juego sin generar sombras ni deslumbramiento."
                     )
                     else -> listOf("Información no disponible")
                 }
@@ -264,7 +270,7 @@ class DashboardViewModel(private val repository: RuleRepository) : ViewModel() {
                     color = triple.third,
                     sortOrder = num,
                     paraphrase = paraphrase,
-                    officialText = "Información no disponible",
+                    sourceText = "Información no disponible",
                     keyPoints = keyPoints,
                     progress = 0f,
                     isCompleted = false
@@ -273,6 +279,54 @@ class DashboardViewModel(private val repository: RuleRepository) : ViewModel() {
 
             repository.syncArticles(articles)
             
+            // AGREGAMOS PREGUNTAS DEL QUIZ PARA EL ARTÍCULO 1
+            val quizQuestions = listOf(
+                com.tecsup.hoopaxis.data.model.QuizQuestion(
+                    id = "q1",
+                    question = "¿Cuál es el objetivo central del basketball según el reglamento?",
+                    options = listOf(
+                        "Mantener la posesión del balón el mayor tiempo posible sin lanzar.",
+                        "Encestar el balón en el aro del equipo contrario e impedir que este anote en el propio.",
+                        "Realizar la mayor cantidad de faltas tácticas para frenar al rival.",
+                        "Jugar únicamente en la mitad de la pista asignada."
+                    ),
+                    correctIndex = 1,
+                    explanation = "El reglamento establece que el objetivo es encestar en el aro contrario y defender el propio.",
+                    category = "a1" // Usamos el ID del artículo como categoría para filtrar
+                ),
+                com.tecsup.hoopaxis.data.model.QuizQuestion(
+                    id = "q2",
+                    question = "¿Cuántos jugadores por equipo se encuentran en la pista durante el partido?",
+                    options = listOf("Tres jugadores.", "Cuatro jugadores.", "Cinco jugadores.", "Seis jugadores."),
+                    correctIndex = 2,
+                    explanation = "El deporte enfrenta a dos equipos compuestos por cinco jugadores en pista.",
+                    category = "a1"
+                ),
+                com.tecsup.hoopaxis.data.model.QuizQuestion(
+                    id = "q3",
+                    question = "¿A quiénes tienen la obligación de notificar los participantes si detectan un descuadre en el marcador o los relojes?",
+                    options = listOf("Al capitán del equipo rival.", "A los espectadores en las gradas.", "De inmediato a los árbitros.", "Exclusivamente al comisionado al final del juego."),
+                    correctIndex = 2,
+                    explanation = "Los miembros de las delegaciones tienen la obligación de notificar de inmediato a los árbitros cualquier falla o descuadre.",
+                    category = "a1"
+                ),
+                com.tecsup.hoopaxis.data.model.QuizQuestion(
+                    id = "q4",
+                    question = "¿Cómo se determina al equipo ganador de un encuentro de basketball?",
+                    options = listOf(
+                        "El conjunto que anote primero en la prórroga.",
+                        "El equipo que cometa menos faltas personales.",
+                        "El conjunto que acumule la mayor cantidad de puntos una vez finalizado el tiempo reglamentario de juego.",
+                        "Por decisión de los oficiales de mesa."
+                    ),
+                    correctIndex = 2,
+                    explanation = "Obtiene la victoria el conjunto que acumule la mayor cantidad de puntos al finalizar el tiempo reglamentario.",
+                    category = "a1"
+                )
+            )
+
+            quizQuestions.forEach { repository.addQuizQuestion(it) }
+
             // Sincronizamos específicamente los Artículos 1, 2 y 3 a Firebase
             articles.filter { it.id in listOf("a1", "a2", "a3") }.forEach { art ->
                 repository.addArticle(art)
