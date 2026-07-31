@@ -9,7 +9,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -66,10 +68,7 @@ fun LessonScreen(
 
     LaunchedEffect(quizPassed) {
         if (quizPassed) {
-            // Si el quiz fue exitoso, podríamos marcar el artículo como completado localmente
-            article?.let {
-                // repository.updateArticle(it.copy(isCompleted = true))
-            }
+            // Aquí se podría marcar como completado en la DB
         }
     }
 
@@ -132,23 +131,34 @@ fun LessonScreen(
 
                     Spacer(modifier = Modifier.height(32.dp))
 
-                    // BOTTOM ACTION
+                    // BOTTOM ACTION (PREMIUM CHALLENGE BUTTON)
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(56.dp)
-                            .clip(RoundedCornerShape(20.dp))
+                            .height(68.dp)
+                            .shadow(
+                                elevation = 20.dp,
+                                shape = RoundedCornerShape(24.dp),
+                                spotColor = if (quizPassed) AppColors.Purple else Color(0xFF00F2FF)
+                            )
+                            .clip(RoundedCornerShape(24.dp))
                             .background(
                                 Brush.linearGradient(
                                     colors = if (quizPassed) listOf(AppColors.Purple, AppColors.Pink)
-                                             else listOf(Color.Gray, Color.DarkGray)
+                                             else listOf(Color(0xFF00F2FF), Color(0xFFC96BFF), Color(0xFFFF6B9D)) // Cyan to Purple to Pink
                                 )
+                            )
+                            .border(
+                                width = 2.dp,
+                                color = if (quizPassed) Color.White.copy(alpha = 0.3f) else Color(0xFF00F2FF).copy(alpha = 0.5f),
+                                shape = RoundedCornerShape(24.dp)
                             )
                             .clickable { 
                                 if (quizPassed) {
                                     val currentNum = art.sortOrder
                                     if (currentNum < 50) {
                                         val nextId = "a${currentNum + 1}"
+                                        navController.currentBackStackEntry?.savedStateHandle?.set("quiz_passed", false)
                                         navController.navigate("lesson/$nextId/$ruleColorHex") {
                                             popUpTo("lesson/${art.id}/$ruleColorHex") { inclusive = true }
                                         }
@@ -161,15 +171,26 @@ fun LessonScreen(
                             }, 
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = if (quizPassed) {
-                                if (art.sortOrder < 50) "Siguiente lección →" else "Finalizar lectura"
-                            } else {
-                                "¡Demuestra lo aprendido! 🎯"
-                            },
-                            color = Color.White, 
-                            fontWeight = FontWeight.Black
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = if (quizPassed) Icons.AutoMirrored.Rounded.ArrowForward else Icons.Rounded.ElectricBolt,
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(26.dp)
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(
+                                text = if (quizPassed) {
+                                    if (art.sortOrder < 50) "SIGUIENTE LECCIÓN" else "FINALIZAR LECTURA"
+                                } else {
+                                    "¡DESBLOQUEAR SIGUIENTE NIVEL!"
+                                }, 
+                                color = Color.White, 
+                                fontWeight = FontWeight.Black,
+                                fontSize = 16.sp,
+                                letterSpacing = 2.sp
+                            )
+                        }
                     }
                 }
 
