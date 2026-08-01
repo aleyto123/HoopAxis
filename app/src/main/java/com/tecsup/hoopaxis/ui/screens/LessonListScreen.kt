@@ -48,11 +48,19 @@ fun LessonListScreen(
         factory = DashboardViewModel.provideFactory(repository)
     )
     
-    val articles by viewModel.articles.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
+    val articles = uiState.chapterFilteredArticles
     val ruleColor = Color(android.graphics.Color.parseColor("#${ruleColorHex ?: "C96BFF"}"))
 
     LaunchedEffect(chapterId) {
         chapterId?.let { viewModel.selectChapter(it) }
+    }
+
+    if (uiState.isLoading) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator(color = AppColors.Purple)
+        }
+        return
     }
 
     AnimatedVisibility(

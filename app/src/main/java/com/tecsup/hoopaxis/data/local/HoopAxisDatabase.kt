@@ -11,7 +11,7 @@ import com.tecsup.hoopaxis.data.model.Rule
 import com.tecsup.hoopaxis.data.model.User
 import com.tecsup.hoopaxis.data.model.QuizQuestion
 
-@Database(entities = [User::class, Rule::class, Chapter::class, Article::class, QuizQuestion::class], version = 26, exportSchema = false)
+@Database(entities = [User::class, Rule::class, Chapter::class, Article::class, QuizQuestion::class], version = 48, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class HoopAxisDatabase : RoomDatabase() {
     abstract fun dao(): HoopAxisDao

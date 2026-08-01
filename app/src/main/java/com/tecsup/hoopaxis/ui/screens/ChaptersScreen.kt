@@ -1,5 +1,7 @@
 package com.tecsup.hoopaxis.ui.screens
 
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -49,7 +51,7 @@ fun ArticlesScreen(
     )
     
     val uiState by viewModel.uiState.collectAsState()
-    val articles by viewModel.articlesByRule.collectAsState()
+    val articles = uiState.filteredArticles
     
     val rule = uiState.rules.find { it.id == ruleId }
 
@@ -57,73 +59,82 @@ fun ArticlesScreen(
         ruleId?.let { viewModel.selectRule(it) }
     }
 
-    Scaffold(
-        bottomBar = { 
-            BottomNavBar(
-                currentRoute = "articulos",
-                onHomeClick = onNavigateToHome,
-                onRulesClick = onNavigateToRules,
-                onArticlesClick = onNavigateToArticles,
-                onProfileClick = onNavigateToProfile
-            ) 
-        },
-        containerColor = Color.Transparent
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 20.dp)
-                .verticalScroll(rememberScrollState())
-        ) {
-            Spacer(modifier = Modifier.height(32.dp))
-            
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Column {
-                    Text(
-                        text = if (ruleId == "all" || ruleId == null) "TODOS LOS ARTÍCULOS" else "REGLA ${rule?.number ?: ""}",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = AppColors.TextSecondary,
-                        letterSpacing = 1.sp
-                    )
-                    Text(
-                        text = if (ruleId == "all" || ruleId == null) "${articles.size} Artículos" else rule?.title ?: "Artículos",
-                        style = MaterialTheme.typography.displayLarge
-                    )
-                }
+    Crossfade(targetState = uiState.isLoading, animationSpec = tween(300)) { loading ->
+        if (loading) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                LoadingPulse()
             }
-
-            if (uiState.user?.isAdmin == true) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(
-                    onClick = onNavigateToAdmin,
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(containerColor = AppColors.Purple)
+        } else {
+            Scaffold(
+                bottomBar = { 
+                    BottomNavBar(
+                        currentRoute = "articulos",
+                        onHomeClick = onNavigateToHome,
+                        onRulesClick = onNavigateToRules,
+                        onArticlesClick = onNavigateToArticles,
+                        onProfileClick = onNavigateToProfile
+                    ) 
+                },
+                containerColor = Color.Transparent
+            ) { paddingValues ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                        .padding(horizontal = 20.dp)
+                        .verticalScroll(rememberScrollState())
                 ) {
-                    Icon(Icons.Default.Settings, null)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("ADMINISTRAR")
+                    Spacer(modifier = Modifier.height(32.dp))
+                    
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Column {
+                            Text(
+                                text = if (ruleId == "all" || ruleId == null) "TODOS LOS ARTÍCULOS" else "REGLA ${rule?.number ?: ""}",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = AppColors.TextSecondary,
+                                letterSpacing = 1.sp
+                            )
+                            Text(
+                                text = if (ruleId == "all" || ruleId == null) "${articles.size} Artículos" else rule?.title ?: "Artículos",
+                                style = MaterialTheme.typography.displayLarge
+                            )
+                        }
+                    }
+
+                    if (uiState.user?.isAdmin == true) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Button(
+                            onClick = onNavigateToAdmin,
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(containerColor = AppColors.Purple)
+                        ) {
+                            Icon(Icons.Default.Settings, null)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("ADMINISTRAR")
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    articles.forEach { article ->
+                        val articleColor = Color(android.graphics.Color.parseColor(article.color))
+                        ChaptersArticleCard(
+                            article = article,
+                            ruleColor = articleColor,
+                            onClick = { 
+                                onNavigateToDetail(article.id, article.title, article.color.removePrefix("#"))
+                            }
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
+                    
+                    Spacer(modifier = Modifier.height(32.dp))
                 }
             }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            articles.forEach { article ->
-                val articleColor = Color(android.graphics.Color.parseColor(article.color))
-                ChaptersArticleCard(
-                    article = article,
-                    ruleColor = articleColor,
-                    onClick = { 
-                        onNavigateToDetail(article.id, article.title, article.color.removePrefix("#"))
-                    }
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-            
-            Spacer(modifier = Modifier.height(32.dp))
         }
     }
 }
+
 
 @Composable
 private fun ChaptersArticleCard(article: Article, ruleColor: Color, onClick: () -> Unit) {

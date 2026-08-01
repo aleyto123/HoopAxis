@@ -23,6 +23,15 @@ class RuleRepository(
 
     suspend fun login(user: User) {
         dao.insertUser(user)
+        try {
+            remote.saveUserProfile(user)
+        } catch (e: Exception) {
+            android.util.Log.e("RuleRepo", "Error al sincronizar perfil: ${e.message}")
+        }
+    }
+
+    suspend fun getUserProfile(userId: String): User? {
+        return remote.getUserProfile(userId)
     }
 
     suspend fun logout() {

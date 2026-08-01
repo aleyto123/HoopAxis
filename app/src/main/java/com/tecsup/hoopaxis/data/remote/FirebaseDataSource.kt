@@ -62,4 +62,17 @@ class FirebaseDataSource {
     suspend fun deleteQuizQuestion(questionId: String) {
         db.collection("quiz_questions").document(questionId).delete().await()
     }
+
+    // Perfil de Usuario
+    suspend fun getUserProfile(userId: String): User? {
+        return try {
+            db.collection("usuarios").document(userId).get().await().toObject(User::class.java)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    suspend fun saveUserProfile(user: User) {
+        db.collection("usuarios").document(user.id).set(user).await()
+    }
 }

@@ -68,7 +68,9 @@ fun LessonScreen(
 
     LaunchedEffect(quizPassed) {
         if (quizPassed) {
-            // Aquí se podría marcar como completado en la DB
+            article?.let {
+                viewModel.completeArticle(it)
+            }
         }
     }
 

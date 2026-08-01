@@ -45,13 +45,14 @@ class AuthViewModel(private val repository: RuleRepository) : ViewModel() {
                 val result = auth.signInWithCredential(credential).await()
                 val firebaseUser = result.user
                 if (firebaseUser != null) {
-                    val user = User(
+                    val serverProfile = repository.getUserProfile(firebaseUser.uid)
+                    val user = serverProfile ?: User(
                         id = firebaseUser.uid,
                         name = firebaseUser.displayName ?: "Árbitro",
                         email = firebaseUser.email ?: "",
                         isLoggedIn = true
                     )
-                    repository.login(user)
+                    repository.login(user.copy(isLoggedIn = true))
                     onSuccess()
                 }
             } catch (e: Exception) {
@@ -98,13 +99,14 @@ class AuthViewModel(private val repository: RuleRepository) : ViewModel() {
                 val result = auth.signInWithEmailAndPassword(email, password).await()
                 val firebaseUser = result.user
                 if (firebaseUser != null) {
-                    val user = User(
+                    val serverProfile = repository.getUserProfile(firebaseUser.uid)
+                    val user = serverProfile ?: User(
                         id = firebaseUser.uid,
                         name = firebaseUser.displayName ?: "Árbitro",
                         email = firebaseUser.email ?: "",
                         isLoggedIn = true
                     )
-                    repository.login(user)
+                    repository.login(user.copy(isLoggedIn = true))
                     onSuccess()
                 }
             } catch (e: Exception) {

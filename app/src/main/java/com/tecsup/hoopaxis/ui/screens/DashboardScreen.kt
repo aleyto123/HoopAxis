@@ -1,5 +1,7 @@
 package com.tecsup.hoopaxis.ui.screens
 
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -20,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -54,75 +57,77 @@ fun DashboardScreen(
     
     val uiState by viewModel.uiState.collectAsState()
 
-    Scaffold(
-        bottomBar = { 
-            BottomNavBar(
-                currentRoute = "inicio",
-                onHomeClick = onNavigateToHome,
-                onRulesClick = onNavigateToRules,
-                onArticlesClick = onNavigateToArticles,
-                onProfileClick = onNavigateToProfile
-            ) 
-        },
-        containerColor = Color.Transparent
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 20.dp)
-                .verticalScroll(rememberScrollState())
-        ) {
-            Spacer(modifier = Modifier.height(24.dp))
-            Header(userName = uiState.user?.name ?: "Árbitro")
-            
-            if (uiState.user?.isAdmin == true) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(
-                    onClick = onNavigateToAdmin,
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(containerColor = AppColors.Purple)
+    Crossfade(targetState = uiState.isLoading, animationSpec = tween(300)) { loading ->
+        if (loading) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                LoadingPulse()
+            }
+        } else {
+            Scaffold(
+                bottomBar = { 
+                    BottomNavBar(
+                        currentRoute = "inicio",
+                        onHomeClick = onNavigateToHome,
+                        onRulesClick = onNavigateToRules,
+                        onArticlesClick = onNavigateToArticles,
+                        onProfileClick = onNavigateToProfile
+                    ) 
+                },
+                containerColor = Color.Transparent
+            ) { paddingValues ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                        .padding(horizontal = 20.dp)
+                        .verticalScroll(rememberScrollState())
                 ) {
-                    Icon(Icons.Default.Settings, null)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("PANEL DE ADMINISTRADOR")
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Header(userName = uiState.user?.name ?: "Árbitro")
+                    
+                    if (uiState.user?.isAdmin == true) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Button(
+                            onClick = onNavigateToAdmin,
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(containerColor = AppColors.Purple)
+                        ) {
+                            Icon(Icons.Default.Settings, null)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("PANEL DE ADMINISTRADOR")
+                        }
+                    }
+                    
+                    Spacer(modifier = Modifier.height(24.dp))
+                    ProgressCard(uiState)
+                    Spacer(modifier = Modifier.height(24.dp))
+                    CategorySection(
+                        rules = uiState.rules,
+                        onCategoryClick = onNavigateToDetail,
+                        onViewAllClick = onNavigateToRules
+                    )
+                    Spacer(modifier = Modifier.height(32.dp))
+                    ContinueStudyingSection(
+                        articles = uiState.allArticles.filter { it.progress > 0 && it.progress < 1 }.take(3),
+                        rules = uiState.rules,
+                        onArticleClick = { article ->
+                            val rule = uiState.rules.find { it.id == article.ruleId }
+                            onNavigateToChapterLessonList(
+                                article.id, 
+                                article.title, 
+                                rule?.color?.removePrefix("#") ?: "C96BFF"
+                            )
+                        },
+                        onViewAllClick = onNavigateToArticles
+                    )
+                    Spacer(modifier = Modifier.height(32.dp))
                 }
             }
-            
-            if (uiState.isLoading) {
-                LinearProgressIndicator(
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                    color = AppColors.Blue,
-                    trackColor = Color.White.copy(alpha = 0.1f)
-                )
-            }
-            
-            Spacer(modifier = Modifier.height(24.dp))
-            ProgressCard(uiState)
-            Spacer(modifier = Modifier.height(24.dp))
-            CategorySection(
-                rules = uiState.rules,
-                onCategoryClick = onNavigateToDetail,
-                onViewAllClick = onNavigateToRules
-            )
-            Spacer(modifier = Modifier.height(32.dp))
-            ContinueStudyingSection(
-                articles = uiState.allArticles.filter { it.progress > 0 && it.progress < 1 }.take(3),
-                rules = uiState.rules,
-                onArticleClick = { article ->
-                    val rule = uiState.rules.find { it.id == article.ruleId }
-                    onNavigateToChapterLessonList(
-                        article.id, 
-                        article.title, 
-                        rule?.color?.removePrefix("#") ?: "C96BFF"
-                    )
-                },
-                onViewAllClick = onNavigateToArticles
-            )
-            Spacer(modifier = Modifier.height(32.dp))
         }
     }
 }
+
+
 
 @Composable
 fun Header(userName: String) {

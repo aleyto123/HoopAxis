@@ -124,6 +124,9 @@ fun QuizScreen(
                 history.clear()
             },
             onFinish = { passed ->
+                // Actualizamos estadísticas del usuario antes de salir
+                viewModel.updateQuizStats(questions.size, score)
+
                 if (passed) {
                     // Si pasó, volvemos a la lección con un flag de éxito o simplemente permitimos avanzar
                     navController.previousBackStackEntry?.savedStateHandle?.set("quiz_passed", true)
