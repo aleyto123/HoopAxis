@@ -247,7 +247,7 @@ fun ParaphraseCard(ruleColor: Color, article: Article) {
             Column(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                article.keyPoints.forEach { sectionText ->
+                article.paraphrase.forEach { sectionText ->
                     KeyPointCard(text = sectionText, color = ruleColor)
                 }
             }
@@ -273,7 +273,7 @@ fun ParaphraseCard(ruleColor: Color, article: Article) {
                     .padding(16.dp)
             ) {
                 Text(
-                    text = article.paraphrase,
+                    text = article.keyPoints,
                     color = Color.White.copy(alpha = 0.95f),
                     fontSize = 14.sp,
                     lineHeight = 22.sp,

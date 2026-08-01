@@ -293,9 +293,9 @@ fun ArticleDialog(article: Article?, chapters: List<Chapter>, onDismiss: () -> U
     var title by remember { mutableStateOf(article?.title ?: "") }
     var number by remember { mutableStateOf(article?.articleNumber ?: "") }
     var chapterId by remember { mutableStateOf(article?.chapterId ?: chapters.firstOrNull()?.id ?: "") }
-    var paraphrase by remember { mutableStateOf(article?.paraphrase ?: "") }
+    var keyPoints by remember { mutableStateOf(article?.keyPoints ?: "") }
     var sourceText by remember { mutableStateOf(article?.sourceText ?: "") }
-    var keyPointsStr by remember { mutableStateOf(article?.keyPoints?.joinToString("\n") ?: "") }
+    var paraphraseStr by remember { mutableStateOf(article?.paraphrase?.joinToString("\n") ?: "") }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -305,9 +305,9 @@ fun ArticleDialog(article: Article?, chapters: List<Chapter>, onDismiss: () -> U
                 TextField(value = chapterId, onValueChange = { chapterId = it }, label = { Text("ID Capítulo") })
                 TextField(value = number, onValueChange = { number = it }, label = { Text("Número (Ej: Art. 1)") })
                 TextField(value = title, onValueChange = { title = it }, label = { Text("Título") })
-                TextField(value = paraphrase, onValueChange = { paraphrase = it }, label = { Text("Parafraseo") }, modifier = Modifier.height(100.dp))
+                TextField(value = paraphraseStr, onValueChange = { paraphraseStr = it }, label = { Text("Parafraseo (uno por línea)") }, modifier = Modifier.height(100.dp))
                 TextField(value = sourceText, onValueChange = { sourceText = it }, label = { Text("Texto") }, modifier = Modifier.height(100.dp))
-                TextField(value = keyPointsStr, onValueChange = { keyPointsStr = it }, label = { Text("Puntos Clave (uno por línea)") }, modifier = Modifier.height(100.dp))
+                TextField(value = keyPoints, onValueChange = { keyPoints = it }, label = { Text("Puntos Clave") }, modifier = Modifier.height(100.dp))
             }
         },
         confirmButton = {
@@ -318,9 +318,9 @@ fun ArticleDialog(article: Article?, chapters: List<Chapter>, onDismiss: () -> U
                     title = title,
                     articleNumber = number,
                     sortOrder = try { number.filter { it.isDigit() }.toInt() } catch (_: Exception) { 0 },
-                    paraphrase = paraphrase,
+                    paraphrase = paraphraseStr.split("\n").filter { it.isNotBlank() },
                     sourceText = sourceText,
-                    keyPoints = keyPointsStr.split("\n").filter { it.isNotBlank() },
+                    keyPoints = keyPoints,
                     isCompleted = article?.isCompleted ?: false
                 ))
             }) { Text("GUARDAR") }

@@ -13,9 +13,9 @@ data class Article(
     val articleNumber: String = "",
     val color: String = "#C96BFF",
     val sortOrder: Int = 0,
-    val paraphrase: String = "",
+    val keyPoints: String = "",
     val sourceText: String = "",
-    val keyPoints: List<String> = emptyList(),
+    val paraphrase: List<String> = emptyList(),
     val progress: Float = 0f,
     val isCompleted: Boolean = false
 )

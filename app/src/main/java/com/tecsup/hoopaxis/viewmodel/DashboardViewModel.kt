@@ -64,14 +64,9 @@ class DashboardViewModel(private val repository: RuleRepository) : ViewModel() {
 
     fun refreshData() {
         viewModelScope.launch {
-            val currentArticles = repository.allArticles.first()
-            if (currentArticles.size < 50) {
-                _isLoading.value = true
-                loadInitialData()
-                _isLoading.value = false
-            } else {
-                _isLoading.value = false
-            }
+            _isLoading.value = true
+            loadInitialData()
+            _isLoading.value = false
         }
     }
 
@@ -185,31 +180,60 @@ class DashboardViewModel(private val repository: RuleRepository) : ViewModel() {
                         else -> "📄"
                     },
                     color = rules.find { it.id == ruleId }?.color ?: "#C96BFF",
-                    paraphrase = when(i) {
-                        1 -> "• Enfrentamiento 5 vs 5 en pista.\n• Objetivo: Encestar e impedir anotaciones.\n• Cumplir normas y conducta deportiva.\n• Gana el equipo con más puntos."
-                        2 -> "• Superficie lisa y dura de 28x15 metros.\n• División en pista trasera y delantera.\n• Líneas de 5 cm de ancho.\n• Áreas técnicas fuera del terreno."
-                        3 -> "• Elementos esenciales homologados.\n• Control de tiempos (juego y tiro).\n• Señalización de faltas y posesión.\n• Iluminación y actas digitales/físicas."
-                        4 -> "• Registro de 12 jugadores y 8 acompañantes.\n• Uniformes del mismo tono dominante.\n• Números visibles (10cm pecho, 20cm espalda).\n• Prohibición de joyas u objetos peligrosos."
-                        5 -> "• Interrupción por lesión en balón muerto.\n• Sustitución si recibe atención (aprox 15s).\n• Heridas abiertas deben cubrirse totalmente.\n• Excepción por tiempo muerto solicitado."
-                        6 -> "• Único autorizado para hablar con árbitros.\n• Aclaraciones respetuosas en balón muerto.\n• Firma del acta en caso de protesta oficial.\n• Representación legal del equipo en pista."
-                        7 -> "• Trámites de lista (40m) y quinteto (10m).\n• Único autorizado a estar de pie en banquillo.\n• Gestión de tiempos muertos y sustituciones.\n• Responsable del Coach Challenge (HCC)."
-                        8 -> "• Duración: 4 periodos de 10 minutos de tiempo real.\n• Pausas: 2 min entre periodos 1-2 y 3-4.\n• Descanso de 15 min al medio tiempo.\n• Prórrogas de 5 min en caso de empate al final."
-                        9 -> "• Inicio: palmeo en salto entre dos (1º cuarto).\n• Otros periodos: balón a disposición para saque.\n• Condición: mínimo 5 jugadores equipados por equipo.\n• Conclusión: alarma acústica del reloj principal."
-                        10 -> "• Vivo: mano del árbitro en salto o disposición para tiro/saque.\n• Muerto: canasta válida, silbato arbitral o alarma final.\n• Detención del reloj en balón muerto.\n• Sincronización con el operador de mesa."
-                        11 -> "• Ubicación: determinada por punto de contacto en suelo.\n• Aire: mantiene condición del último lugar pisado.\n• Árbitros: se consideran parte del terreno de juego.\n• Balón al tocar árbitro: regla de superficie igual."
-                        12 -> "• Salto entre dos: solo al inicio del 1er cuarto.\n• Flecha: resuelve luchas y otros inicios de periodo.\n• Rotación: la flecha cambia tras cada entrega reglamentaria.\n• Mesa: encargada de gestionar la dirección de flecha."
-                        13 -> "• Manejo: exclusivo con manos en cualquier dirección.\n• Violación: golpe intencionado con pie o pierna.\n• Accidental: contacto con pie no detiene el juego.\n• Prohibición: golpear el balón con el puño."
-                        14 -> "• Control individual: al sostener o botar balón vivo.\n• Control equipo: mientras se posea o pase el balón.\n• Fin: robo rival, canasta, balón muerto o tiro.\n• Transición: tras abandono de mano en lanzamiento."
-                        15 -> "• Inicio: movimiento continuo previo al lanzamiento.\n• Incluye elevación de brazos o impulso del cuerpo.\n• Finalización: balón fuera de mano y apoyo estable.\n• Protección del lanzador durante toda la acción técnica."
-                        16 -> "• Canasta: balón vivo entra por parte superior del aro.\n• Valor: 1 (tiro libre), 2 (campo), 3 (tras 6.75m).\n• Propia accidental: suma 2 al capitán rival.\n• Propia intencionada: violación y tiro no suma."
-                        17 -> "• Ejecución: posicionado fuera de límites según árbitro.\n• Tiempo: 5 segundos máximo para soltar el balón.\n• Restricción: no pisar cancha ni botar fuera antes.\n• Defensa: no cruzar línea divisoria antes del tiro."
-                        18 -> "• Duración: pausa estratégica de exactamente 1 minuto.\n• Distribución: 2 en 1ª mitad, 3 en 2ª mitad (máx 2 ult 2m).\n• Prórroga: se concede 1 tiempo muerto adicional.\n• Solicitud: exclusiva por parte del primer entrenador."
-                        19 -> "• Pedido: sustituto en persona ante la mesa de control.\n• Oportunidad: durante pausas reglamentarias autorizadas.\n• Ingreso: tras autorización y salida del jugador anterior.\n• Zona: el cambio se realiza por el área de sustitución."
-                        20 -> "• Causas: Negarse a jugar, no presentarse 15 min después de la hora oficial programada o acciones deliberadas que impidan la continuidad del juego.\n• Sanción: El equipo rival gana 20 a 0 y el infractor recibe 0 puntos en la tabla."
-                        21 -> "• Causa: Ocurre si durante el transcurso del encuentro el número de jugadores activos de un equipo sobre la pista queda reducido a menos de 2 (debido a faltas o expulsiones).\n• Sanción: Si el equipo afectado iba ganando, el resultado se modifica automáticamente a 2 a 0 rival. Si iba perdiendo, se mantiene el marcador. El derrotado suma 1 punto en la tabla."
+                    keyPoints = when (i) {
+                        1 -> "• Partido entre dos equipos de 5 jugadores.\n• Objetivo: encestar y defender el aro.\n• Control a cargo de árbitros y oficiales.\n• Gana el equipo con más puntos al final."
+                        2 -> "• Superficie lisa y dura de 28x15 metros.\n• División en pista trasera y delantera.\n• Líneas perimetrales y de marcación de 5 cm.\n• Ubicación de la mesa de control fuera de banda."
+                        3 -> "• Unidades de canasta completas y tableros.\n• Balones homologados y relojes principales.\n• Actas oficiales y marcadores de faltas.\n• Flecha de posesión y sistemas de iluminación."
+                        4 -> "• Registro de 12 jugadores y hasta 8 acompañantes.\n• Indumentaria uniforme con números visibles.\n• Prohibición de joyas u objetos cortantes.\n• Accesorios de compresión con tono uniforme."
+                        5 -> "• Interrupción por lesión en balón muerto.\n• Sustitución obligatoria si hay atención médica.\n• Regreso condicionado a heridas cubiertas.\n• Excepción mediante solicitud de tiempo muerto."
+                        6 -> "• Capitán como único interlocutor respetuoso.\n• Derecho a aclaraciones en balón muerto.\n• Obligación de firmar el acta en caso de protesta.\n• Representación formal del equipo en la pista."
+                        7 -> "• Trámites previos de listas y quinteto inicial.\n• Entrenador principal autorizado a estar de pie.\n• Gestión de tiempos muertos y sustituciones.\n• Responsabilidad sobre el desafío de entrenador."
+                        8 -> "• Encuentro dividido en 4 periodos de 10 minutos.\n• Pausas de 2 minutos y descanso de 15 minutos.\n• Prórrogas de 5 minutos en caso de empate.\n• Tiempos reglamentarios de tiempo real de juego."
+                        9 -> "• Inicio con salto entre dos en el 1er cuarto.\n• Saques de banda para iniciar otros periodos.\n• Obligación de contar con 5 jugadores listos.\n• Finalización dictada por la alarma acústica."
+                        10 -> "• Balón vivo en salto, tiros libres o saques.\n• Balón muerto por canasta, silbato o alarma.\n• Delimitación exacta del estado del balón.\n• Control regulado por los oficiales de mesa."
+                        11 -> "• Posición espacial fijada por el contacto de los pies.\n• Mantenimiento de la condición estando en el aire.\n• Árbitros integrados como parte de la superficie.\n• Impacto en colegiado asimilado al suelo."
+                        12 -> "• Salto entre dos exclusivo del primer cuarto.\n• Flecha de posesión alterna para situaciones de lucha.\n• Rotación de la dirección tras cada utilización.\n• Resolución dinámica de dudas de posesión."
+                        13 -> "• Manejo del balón exclusivamente con las manos.\n• Violación por golpe intencionado con el pie.\n• Continuidad del juego ante rebotes involuntarios.\n• Prohibición general de golpear con el puño."
+                        14 -> "• Control individual mediante posesión o bote.\n• Control de equipo durante pases internos.\n• Finalización del control por robo o tiro.\n• Transición del balón fuera de las manos."
+                        15 -> "• Inicio formal en el movimiento continuo de tiro.\n• Implica elevación de brazos e impulso corporal.\n• Finalización al soltar el balón y aterrizar.\n• Delimitación temporal de la acción técnica."
+                        16 -> "• Canasta válida al atravesar el aro superior.\n• Puntuación de 1, 2 o 3 puntos según la zona.\n• Asignación de canasta propia al capitán rival.\n• Sanción de violación por encestar a propósito."
+                        17 -> "• Ejecución del saque desde fuera de los límites.\n• Plazo máximo de 5 segundos para soltar el balón.\n• Prohibición de pisar o botar fuera del campo.\n• Restricción defensiva de cruzar la línea."
+                        18 -> "• Pausas tácticas de 1 minuto para el entrenador.\n• Distribución de 2 en primera y 3 en segunda mitad.\n• Concesión de 1 tiempo muerto por prórroga.\n• Control estricto en los últimos dos minutos."
+                        19 -> "• Solicitud de cambios presencial ante la mesa.\n• Oportunidad exclusiva en pausas reglamentarias.\n• Ingreso obligatorio por la zona de sustitución.\n• Salida previa del jugador relevado."
+                        20 -> "• Incomparecencia por negativa o retraso de 15 min.\n• Pérdida del encuentro con marcador de 20 a 0.\n• Cero puntos en la tabla para el infractor.\n• Aplicación directa de la norma de ausencia."
+                        21 -> "• Reducción de jugadores activos a menos de 2.\n• Modificación del marcador a 2 a 0 si iba ganando.\n• Mantenimiento del resultado si iba perdiendo.\n• Asignación de 1 punto en la tabla al derrotado."
+                        22 -> "• Infracción menor sin llegar a falta personal.\n• Sanción mediante saque de banda o fondo.\n• Ejecución desde el punto más cercano.\n• Exclusiones normativas específicas."
+                        23 -> "• Jugador fuera por tocar elementos externos.\n• Balón fuera al impactar soportes o tableros.\n• Delimitación espacial basada en las líneas.\n• Pérdida de posesión inmediata."
+                        24 -> "• Inicio del regate al botar o rodar el balón.\n• Infracción por dobles tras concluir el primero.\n• Excepciones por desvíos o tiros previos.\n• Control continuo del bote en pista."
+                        25 -> "• Desplazamiento ilegal manteniendo el balón.\n• Elección reglamentaria del pie de pivote.\n• Obligación de soltar el balón antes de levantar el pie.\n• Restricciones estrictas en el apoyo."
+                        26 -> "• Restricción de 3 segundos en la zona pintada.\n• Aplicación en pista delantera con balón vivo.\n• Excepciones por salida activa o acción de tiro.\n• Control del cronómetro de la llave."
+                        27 -> "• Marcaje estrecho a menos de 1 metro.\n• Límite de 5 segundos para pasar o botar.\n• Exigencia de posición legal defensiva.\n• Dinámica de presión sobre el poseedor."
+                        28 -> "• Obligación de pasar a pista delantera en 8 segundos.\n• Control de la posesión desde la pista trasera.\n• Criterio físico de llegada del balón.\n• Conteo continuo por parte de los oficiales."
+                        29 -> "• Límite de 24 segundos de posesión por equipo.\n• Obligación de golpear el aro con el lanzamiento.\n• Restablecimiento a 14 segundos en supuestos clave.\n• Alarma acústica por agotamiento de tiempo."
+                        30 -> "• Retorno ilegal del balón a la pista trasera.\n• Exigencia de control previo en pista delantera.\n• Toque inicial prohibido en la zona posterior.\n• Sanción de pérdida de posesión."
+                        31 -> "• Prohibición de interferir el balón en el aro.\n• Sanción de goaltending en trayectoria descendente.\n• Validación automática de puntos para la defensa.\n• Anulación de canasta en infracción de ataque."
+                        32 -> "• Infracción por contacto ilegal o conducta.\n• Registro obligatorio en el acta oficial.\n• Base para la acumulación de penalizaciones.\n• Sanción conforme a la gravedad."
+                        33 -> "• Principio de cilindro y verticalidad defensiva.\n• Respeto a tiempos y distancias sin balón.\n• Reglas específicas para pantallas y bloqueos.\n• Penalización de la simulación de faltas."
+                        34 -> "• Contacto ilegal sobre un oponente en juego.\n• Sanción con saque o tiros libres acumulados.\n• Valoración según la situación de tiro.\n• Registro individual del infractor."
+                        35 -> "• Faltas mutuas y simultáneas entre rivales.\n• Anulación recíproca de sanciones equivalentes.\n• Reanudación basada en el control previo.\n• Gestión cronológica de incidencias."
+                        36 -> "• Infracción de conducta sin contacto físico.\n• Sanción con un tiro libre para el rival.\n• Reanudación en el punto de interrupción.\n• Control de actitudes antideportivas."
+                        37 -> "• Contacto excesivo o falta en campo abierto.\n• Sanción con tiros libres y posesión posterior.\n• Protección en transiciones claras de ataque.\n• Restricción en los últimos dos minutos."
+                        38 -> "• Falta descalificante por conducta grave.\n• Expulsión inmediata al vestuario o pabellón.\n• Penalización con tiros libres y posesión.\n• Sanción disciplinaria severa."
+                        39 -> "• Sanción por altercado o violencia física.\n• Descalificación por abandonar el banquillo.\n• Excepción operativa del primer entrenador.\n• Control estricto de trifulcas en pista."
+                        40 -> "• Expulsión obligatoria al acumular 5 faltas.\n• Plazo de 30 segundos para efectuar el cambio.\n• Sanción técnica al banquillo por reingreso.\n• Control riguroso del límite individual."
+                        41 -> "• Penalización colectiva a partir de la 4ª falta.\n• Acumulación en descansos y prórrogas.\n• Concesión automática de 2 tiros libres.\n• Supresión del saque por faltas sin tiro."
+                        42 -> "• Gestión de múltiples faltas simultáneas.\n• Cancelación mutua de sanciones idénticas.\n• Orden cronológico estricto de aplicación.\n• Imposibilidad de compensación posterior."
+                        43 -> "• Lanzamiento libre sin oposición desde la línea.\n• Plazo máximo de 5 segundos para el tirador.\n• Ocupación alternada de los pasillos de rebote.\n• Sanciones específicas por violación de norma."
+                        44 -> "• Corrección exclusiva de errores reglamentarios.\n• Límite temporal antes del siguiente balón vivo.\n• Consolidación definitiva tras la expiración.\n• Supuestos tasados de revisión arbitral."
+                        45 -> "• Composición del cuerpo arbitral y mesa.\n• Principio de absoluta neutralidad e imparcialidad.\n• Uso de indumentaria oficial homologada.\n• Soporte operativo para el desarrollo del juego."
+                        46 -> "• Inspección previa de instalaciones y material.\n• Autoridad para suspender el encuentro.\n• Uso exclusivo del sistema de repetición en vídeo.\n• Cierre y firma definitiva del acta."
+                        47 -> "• Potestad plena sobre faltas y violaciones.\n• Detención del juego mediante el uso del silbato.\n• Aplicación estricta del criterio de ventaja.\n• Coherencia arbitral durante el tiempo oficial."
+                        48 -> "• Registro cronológico de puntos y faltas.\n• Control de sustituciones y tiempos muertos.\n• Notificación inmediata de la quinta falta.\n• Operación del marcador electrónico público."
+                        49 -> "• Cronometraje preciso del tiempo de juego.\n• Medición exacta de pausas y descansos.\n• Activación en saltos, saques y rebotes.\n• Emisión de señales acústicas automáticas."
+                        50 -> "• Control riguroso del reloj de 24 y 14 segundos.\n• Restablecimiento normativo según posesión.\n• Detención ante toques defensivos sin cambio.\n• Emisión de alarma de posesión agotada."
                         else -> "Contenido pedagógico del artículo $i en desarrollo..."
                     },
-                    keyPoints = when(i) {
+                    paraphrase = when (i) {
                         1 -> listOf(
                             "1.1 Principio del partido: Es un deporte que enfrenta a dos equipos compuestos por cinco jugadores en pista. El objetivo central es encestar el balón en el aro del equipo contrario e impedir que este anote en el propio. El control del encuentro está a cargo de los árbitros, los oficiales de mesa y, si lo hubiera, un comisionado.",
                             "1.2 Deberes de los participantes: Los miembros de las delegaciones (jugadores, entrenadores y asistentes) deben acatar las normas y guardar conducta deportiva. Tienen la obligación de notificar de inmediato a los árbitros cualquier falla o descuadre que detecten en el marcador, los relojes o el registro de faltas.",
@@ -235,23 +259,23 @@ class DashboardViewModel(private val repository: RuleRepository) : ViewModel() {
                             "Sistema de iluminación uniforme que cubra la totalidad del terreno de juego sin generar sombras ni deslumbramiento."
                         )
                         4 -> listOf(
-                            "4.1 Integración y miembros elegibles: Cada equipo puede registrar hasta 12 jugadores con derecho a jugar (incluido un capitán). La delegación se complementa con 1 primer entrenador, un máximo de 2 entrenadores ayudantes y hasta 5 miembros adicionales del cuerpo técnico o médico (máximo 8 acompañantes en total). Todos deben figurar en el acta oficial antes del inicio del partido.",
-                            "4.2 Indumentaria y uniformes: Camisetas del mismo tono dominante en parte delantera y trasera (por dentro del pantalón). Pantalones del mismo color dominante. Calcetines del mismo color visible. Números legibles y contrastantes en pecho (mín. 10 cm) y espalda (mín. 20 cm). Se permiten 0, 00 y del 1 al 99.",
-                            "4.3 Equipamiento accesorio y protecciones: Prendas de compresión y accesorios deben ser del mismo tono uniforme para todos los jugadores del equipo que los utilicen. No se permite ningún objeto que pueda cortar o causar lesiones (joyas, anillos, accesorios metáicos sin acolchar)."
+                            "4.1 Integración y miembros elegibles: Cada equipo puede registrar hasta 12 jugadores con derecho a jugar (incluido un capitán). La delegación se complementa con 1 primer entrenador, un máximo de 2 entrenadores ayudantes y hasta 5 miembros adicionales del cuerpo técnico o médico (máximo 8 acompañantes en total). Todos deben figurar en el acta oficial antes del inicio del partido. Durante el juego, solo las personas registradas en el acta pueden sentarse en el banquillo.",
+                            "4.2 Indumentaria y uniformes: Camisetas: Todos los jugadores de un equipo deben vestir camisetas del mismo tono dominante en la parte delantera y trasera. Debe ir por dentro del pantalón. Pantalones: Mismo color dominante para todos los integrantes. No es obligatorio que coincida con el color de la camiseta, pero sí debe ser idéntico entre compañeros. Calcetines: Todos los jugadores deben llevar calcetines del mismo color dominante visible. Numeración: La camiseta debe llevar números legibles y contrastantes en el pecho (mínimo 10 cm de alto) y la espalda (mínimo 20 cm de alto). Se permiten los números 0, 00 y del 1 al 99. No dos jugadores del mismo equipo pueden llevar el mismo número.",
+                            "4.3 Equipamiento accesorio y protecciones: Las prendas de compresión (mangas de brazos, perneras, camisetas interiores) y accesorios (cintas de cabeza, muñequeras, protecciones) deben ser del mismo tono uniforme para todos los jugadores del equipo que los utilicen (o cumplir con las especificaciones neutras de FIBA como negro, blanco o transparente). No se permite ningún objeto que pueda cortar o causar lesiones (joyas, anillos, uñas excesivamente largas o accesorios metálicos sin acolchar)."
                         )
                         5 -> listOf(
-                            "5.1 Interrupción por lesión: Si un jugador se lesiona, los árbitros pueden detener el partido. Si el balón está vivo, el juego solo se interrumpirá cuando el equipo con el balón tire, pierda la posesión o el balón quede muerto, salvo que sea imprescindible actuar de inmediato por la seguridad.",
-                            "5.2 Sustitución obligatoria por atención médica: Si el jugador lesionado no puede recuperarse de inmediato (aproximadamente 15 segundos) o recibe atención médica, debe ser sustituido. Excepción: si el equipo solicita un tiempo muerto y el jugador se recupera antes de que finalice.",
-                            "5.3 Sangrado y heridas abiertas: Cualquier jugador con sangrado o herida abierta debe abandonar el juego. Solo regresa si el sangrado se detuvo y la zona afectada está totalmente cubierta."
+                            "5.1 Interrupción por lesión: Si un jugador se lesiona, los árbitros pueden detener el partido. Si el balón está vivo en el momento de la lesión, el juego solo se interrumpirá cuando el equipo con el balón tire a canasta, pierda la posesión o el balón quede muerto, salvo que sea imprescindible actuar de inmediato por la seguridad del jugador.",
+                            "5.2 Sustitución obligatoria por atención médica: Si el jugador lesionado no puede recuperarse de inmediato (aproximadamente 15 segundos) o recibe atención de los médicos de su equipo, debe ser sustituido. Excepción: El equipo puede mantener al jugador en cancha si solicita un tiempo muerto dentro de esa pausa y el jugador se recupera por completo antes de que finalice el tiempo muerto.",
+                            "5.3 Sangrado y heridas abiertas: Cualquier jugador que presente sangrado o una herida abierta debe abandonar el terreno de juego para ser atendido. Solo podrá regresar una vez que el sangrado se haya detenido y la herida o zona afectada quede totalmente cubierta."
                         )
                         6 -> listOf(
-                            "6.1 Representación en cancha: Es el único jugador autorizado para dirigirse a los árbitros durante las pausas para solicitar aclaraciones respetuosas solo cuando el balón esté muerto.",
-                            "6.2 Firma de protesta: Si el equipo decide protestar formalmente el resultado, el capitán debe firmar la casilla correspondiente en el acta oficial inmediatamente después de concluido el juego."
+                            "6.1 Representación en cancha: Es el único jugador autorizado para dirigirse a los árbitros durante las pausas del partido para solicitar aclaraciones de manera respetuosa y solo cuando el balón esté muerto.",
+                            "6.2 Firma de protesta: Si el equipo decide protestar formalmente el resultado del partido por una irregularidad, el capitán debe firmar la casilla de \"Firma del capitán en caso de protesta\" en el acta oficial al finalizar el encuentro, inmediatamente después de concluido el juego."
                         )
                         7 -> listOf(
-                            "7.1 Trámites antes del partido: Al menos 40 minutos antes, el primer entrenador debe confirmar la lista de jugadores. Al menos 10 minutos antes del partido, debe firmar el acta ratificando el quinteto inicial y banquillo.",
-                            "7.2 Permanencia en pista: Únicamente el primer entrenador está autorizado a permanecer de pie durante el partido dentro de la zona de banquillo para dar instrucciones. El ayudante asume si el principal abandona por expulsión o enfermedad.",
-                            "7.3 Solicitudes técnicas: Corresponde al primer entrenador solicitar tiempos muertos, pedidos de sustitución y el desafío de entrenador (HCC) cuando esté permitido."
+                            "7.1 Trámites antes del partido: Al menos 40 minutos antes de la hora programada, el primer entrenador debe confirmar la lista de nombres y números de los jugadores elegibles. Al menos 10 minutos antes del partido, debe firmar el acta ratificando el quinteto inicial y a los miembros del banquillo.",
+                            "7.2 Permanencia en pista durante el juego: Únicamente el primer entrenador está autorizado a permanecer de pie durante el partido dentro de la zona de banquillo para dar instrucciones a su equipo. Si el primer entrenador debe abandonar el campo por expulsión, descalificación o enfermedad, el primer entrenador ayudante asumirá todas sus funciones y responsabilidades.",
+                            "7.3 Solicitudes técnicas: Corresponde al primer entrenador solicitar los tiempos muertos, realizar los pedidos de sustitución a la mesa de control y pedir el desafío de entrenador (Head Coach Challenge - HCC) cuando esté permitido por el reglamento."
                         )
                         8 -> listOf(
                             "8.1 Duración del encuentro: El partido se divide en 4 periodos (cuartos) de 10 minutos de tiempo real de juego.",
@@ -265,7 +289,7 @@ class DashboardViewModel(private val repository: RuleRepository) : ViewModel() {
                         )
                         10 -> listOf(
                             "10.1 Balón vivo: Ocurre cuando sale de la mano del árbitro durante un salto entre dos, cuando el colegiado lo pone a disposición de un jugador para ejecutar un tiro libre o un saque de banda/fondo.",
-                            "10.2 Balón muerto: Se presenta cuando se encesta un tiro de campo o tiro libre válido, un árbitro hace sonar su silbato con el balón en juego, o suena la señal acústica de finalización de tiempo del reloj de juego o del reloj de tiro de 24/14 segundos."
+                            "10.2 Balón muerto: Se presenta cuando: Se encesta un tiro de campo o tiro libre válido. Un árbitro hace sonar su silbato con el balón en juego. Suena la señal acústica de finalización de tiempo del reloj de juego o del reloj de tiro de 24/14 segundos."
                         )
                         11 -> listOf(
                             "11.1 Ubicación en cancha: La posición espacial de un jugador está determinada por el punto del terreno de juego donde sus pies hacen contacto. Si está suspendido en el aire, mantiene exactamente la misma condición del lugar donde pisó por última vez.",
@@ -306,12 +330,148 @@ class DashboardViewModel(private val repository: RuleRepository) : ViewModel() {
                             "19.2 Ingreso: El relevo solo puede entrar al campo a través de la zona de sustitución una vez que el árbitro realice el gesto oficial de autorización y el jugador sustituido haya abandonado la pista."
                         )
                         20 -> listOf(
-                            "20.1 Causas: Un equipo pierde el partido por incomparecencia si: se niega a jugar tras ser requerido por el árbitro; no se presenta en la cancha con 5 jugadores listos para competir 15 minutos después de la hora oficial programada; sus acciones deliberadas impiden la continuidad del juego.",
+                            "20.1 Causas: Un equipo pierde el partido por incomparecencia si: Se niega a jugar tras ser requerido por el árbitro. No se presenta en la cancha con 5 jugadores listos para competir 15 minutos después de la hora oficial programada. Sus acciones deliberadas impiden la continuidad del juego.",
                             "20.2 Sanción: El equipo rival gana el partido con un resultado anotado de 20 a 0. El equipo infractor recibe 0 puntos en la tabla de clasificación."
                         )
                         21 -> listOf(
                             "21.1 Causa: Ocurre si durante el transcurso del encuentro el número de jugadores activos de un equipo sobre la pista queda reducido a menos de 2 (debido a faltas o expulsiones).",
                             "21.2 Sanción: Si el equipo afectado iba perdiendo, se mantiene el marcador del momento. Si el equipo afectado iba ganando, el resultado se modifica automáticamente a 2 a 0 a favor del oponente. El equipo derrotado por inferioridad suma 1 punto en la tabla de clasificación."
+                        )
+                        22 -> listOf(
+                            "22.1 Definición: Una violación es una infracción del reglamento de juego que no constituye una falta personal o técnica.",
+                            "22.2 Penalización: El balón se concede al equipo contrario para un saque de banda/fondo desde el punto más cercano al lugar donde se cometió la infracción (salvo directamente detrás del tablero), a menos que las reglas estipulen un procedimiento distinto."
+                        )
+                        23 -> listOf(
+                            "23.1 Jugador fuera del terreno: Un jugador está fuera de la pista cuando cualquier parte de su cuerpo toca el suelo o cualquier objeto (que no sea un jugador) que se encuentre sobre o fuera de las líneas delimitadoras.",
+                            "23.2 Balón fuera del terreno: El balón se considera fuera de la pista cuando toca: A un jugador, persona, superficie u objeto situado fuera de los límites del campo. Los soportes del tablero, la parte posterior del tablero o cualquier objeto situado encima del terreno de juego."
+                        )
+                        24 -> listOf(
+                            "24.1 Definición: Un regate inicia cuando un jugador toma el control de un balón vivo, lo lanza, palmea, rueda o bota en el terreno de juego y lo vuelve a tocar antes de que haga contacto con otro jugador.",
+                            "24.2 Infracción por dobles: Un jugador no puede realizar un segundo regate continuo después de haber concluido el primero, a menos que haya perdido el control del balón debido a un tiro a canasta, un toque de un adversario o un pase desviado."
+                        )
+                        25 -> listOf(
+                            "25.1 Definición: Es el desplazamiento no permitido de uno o ambos pies en cualquier dirección mientras se sostiene un balón vivo dentro del terreno de juego.",
+                            "25.2 Determinación del pie de pivote: Al recibir el balón con ambos pies sobre el terreno, el jugador puede elegir cualquiera de los dos como pie de pivote. Para iniciar un regate, el balón debe abandonar la mano del jugador antes de levantarse el pie de pivote. Para pasar o tirar a canasta, el pie de pivote puede levantarse, pero no puede volver a tocar el suelo antes de que el balón haya salido de las manos."
+                        )
+                        26 -> listOf(
+                            "26.1 Regla general: Un jugador atacante no puede permanecer de manera continua durante más de 3 segundos dentro de la zona restringida (zona pintada o \"llave\") de los oponentes mientras su equipo mantenga el control de un balón vivo en su pista delantera y el reloj de juego esté en marcha.",
+                            "26.2 Excepciones: Se concede un margen si el jugador intenta salir activamente de la zona restringida, si se encuentra en acción de tiro o si un compañero está driblando/tirando hacia la canasta."
+                        )
+                        27 -> listOf(
+                            "27.1 Definición: Ocurre cuando un jugador en pista sostiene un balón vivo y un defensor oponente establece una posición legal de defensa a una distancia máxima de 1 metro.",
+                            "27.2 Límite de tiempo: El jugador estrechamente marcado dispone de un tiempo límite de 5 segundos para pasar, lanzar a canasta o iniciar un regate."
+                        )
+                        28 -> listOf(
+                            "28.1 Regla general: Cuando un equipo obtiene la posesión de un balón vivo en su pista trasera, debe lograr que el balón pase a la pista delantera en un plazo máximo de 8 segundos continuos.",
+                            "28.2 Criterio de llegada: El balón se considera en la pista delantera cuando no toca a ningún jugador ni superficie en la pista trasera y hace contacto con la pista delantera o con un atacante/árbitro que toque la pista delantera."
+                        )
+                        29 -> listOf(
+                            "29.1 Límite de posesión: Todo equipo que tome el control de un balón vivo en la pista dispone de 24 segundos para realizar un lanzamiento al aro contrario.",
+                            "29.2 Requisitos del tiro: El balón debe abandonar la mano del lanzador antes de que suene la señal del reloj de tiro y, posteriormente, debe tocar el aro o ingresar en la canasta.",
+                            "29.3 Cuenta reducida a 14 segundos: El reloj de posesión se reinicia a 14 segundos si el juego se detiene por una infracción/falta cometida por la defensa en pista delantera estando el reloj en 13 segundos o menos, o tras un rebote ofensivo después de un tiro de campo o tiro libre no convertido que toque el aro."
+                        )
+                        30 -> listOf(
+                            "30.1 Definición: Ocurre cuando un equipo en control del balón en su pista delantera hace de forma ilegal que el balón regrese a su pista trasera y un jugador de ese mismo equipo es el primero en tocarlo en la zona posterior."
+                        )
+                        31 -> listOf(
+                            "31.1 Intercepción (Goaltending): Se sanciona cuando un jugador toca el balón durante un tiro a canasta mientras este se encuentra completamente por encima del nivel del aro y en trayectoria descendente, o bien después de que el balón haya tocado el tablero.",
+                            "31.2 Interferencia: Se comete cuando un jugador toca el aro, el tablero o la red mientras el balón está sobre el aro o dentro de la canasta, o cuando introduce la mano a través de la red para tocar el balón.",
+                            "31.3 Penalizaciones: Si la comete la defensa: Se da la canasta por válida automáticamente (otorgando 2 o 3 puntos según el tiro). Si la comete el ataque: Se anula la canasta (si entró) y se otorga saque de banda al rival."
+                        )
+                        32 -> listOf(
+                            "32.1 Definición: Una falta es una infracción del reglamento que implica un contacto personal ilegal con un oponente o una conducta antideportiva.",
+                            "32.2 Registro: Toda falta se anota en el acta de partido al infractor correspondiente y se sanciona conforme a lo estipulado en la normativa."
+                        )
+                        33 -> listOf(
+                            "33.1 Principio de cilindro y verticalidad: Cada jugador tiene derecho al espacio cilíndrico que ocupa dentro de la pista (delimitado por las palmas de las manos por delante, las nalgas por detrás y el exterior de las piernas y brazos a los lados). El jugador tiene derecho a saltar verticalmente dentro de su cilindro sin que un oponente invada dicho espacio ilegalmente.",
+                            "33.2 Posición legal de defensa: Un defensor la establece cuando está encarando a su oponente y mantiene ambos pies en contacto con el suelo.",
+                            "33.3 Defensa a un jugador con balón: No se aplican elementos de tiempo ni distancia para establecer la posición legal de defensa; la responsabilidad del contacto recae en el atacante si el defensor ya ocupaba la posición.",
+                            "33.4 Defensa a un jugador sin balón: Deben respetarse los elementos de tiempo y distancia (el defensor debe dar espacio suficiente para que el rival cambie de dirección o se detenga, máximo 2 pasos normales).",
+                            "33.5 Jugador en el aire: Tiene derecho a aterrizar en el mismo lugar o en un punto predecible, siempre que esa zona no estuviera ocupada legalmente por un rival antes de iniciarse el salto.",
+                            "33.6 Pantalla (Screening) legal e ilegal: Legal: Cuando el bloqueador está inmóvil dentro de su cilindro al producirse el contacto. Ilegal: Si el bloqueador está en movimiento o no respeta la distancia/tiempo al colocar la pantalla fuera del campo de visión del rival.",
+                            "33.7 Semicírculo de no-carga (No-charge area): En la zona del semicírculo bajo el aro, no se sanciona falta de ataque por carga al atacante que penetra, siempre que el defensor esté pisando o dentro de la línea del semicírculo (salvo uso ilegal de manos/brazos o falta antideportiva).",
+                            "33.8 Simulación de falta (Flopping): Acción deliberada de fingir o exagerar un contacto sin que exista infracción real. Se penaliza con una advertencia inicial y, si se repite, con falta técnica."
+                        )
+                        34 -> listOf(
+                            "34.1 Definición: Contacto ilegal de un jugador sobre un oponente, independientemente de si el balón está vivo o muerto.",
+                            "34.2 Penalización: Sin acción de tiro: Saque de banda/fondo para el equipo rival (salvo que el equipo infractor esté en penalización por acumulación de faltas de equipo, en cuyo caso se concederán 2 tiros libres). En acción de tiro convertida: La canasta vale y se concede 1 tiro libre adicional. En acción de tiro fallada: Se conceden 2 o 3 tiros libres, según la zona desde donde se realizó el lanzamiento."
+                        )
+                        35 -> listOf(
+                            "35.1 Definición: Situación en la que dos jugadores contrarios se cometen faltas personales o antideportivas/descalificantes de forma mutua y casi simultánea.",
+                            "35.2 Reanudación: Se anota una falta a cada jugador. El juego se reanuda concediendo el balón al equipo que tenía el control previo o mediante la flecha de posesión alterna si no había control claro."
+                        )
+                        36 -> listOf(
+                            "36.1 Definición: Infracción de carácter conductual (sin contacto físico directo) cometida por un jugador, entrenador o integrante del banquillo. Incluye faltas de respeto a los árbitros, retrasar el juego o gestos antideportivos.",
+                            "36.2 Penalización: Se concede 1 tiro libre al equipo contrario. Tras el tiro libre, el partido se reanuda en el mismo punto donde se detuvo el juego antes de la señal."
+                        )
+                        37 -> listOf(
+                            "37.1 Criterios de evaluación: Contacto excesivo o duro sobre un rival en un intento de jugar el balón. Contacto causado por un defensor por la espalda o de lado sobre un atacante en progresión hacia la canasta sin defensores entre él y el aro (campo abierto / clear path). Contacto ilegal del defensor sobre el sacador antes de que el balón abandone sus manos en los últimos 2 minutos del cuarto periodo o de cada prórroga.",
+                            "37.2 Penalización: Otorga tiros libres (1, 2 o 3 según la situación de tiro) más la posesión del balón con un saque de banda en la línea de saque de la pista delantera (con 14 segundos en el reloj de tiro)."
+                        )
+                        38 -> listOf(
+                            "38.1 Definición: Cualquier infracción por acción antideportiva flagrante o conducta grave cometida por jugadores, sustitutos o cuerpo técnico.",
+                            "38.2 Sanción disciplinaria: El infractor es expulsado inmediatamente y debe dirigiéndose al vestuario o abandonar el pabellón.",
+                            "38.3 Penalización en pista: Se conceden tiros libres más la posesión del balón para el equipo contrincante (saque en pista delantera con 14 segundos)."
+                        )
+                        39 -> listOf(
+                            "39.1 Definición: Altercado con violencia física que involucra a dos o más personas dentro o fuera de la pista.",
+                            "39.2 Abandono de banquillo: Cualquier sustituto o miembro del cuerpo técnico que abandone la zona del banquillo durante una trifulca será descalificado de forma automática.",
+                            "39.3 Excepción del entrenador: El primer entrenador (o su asistente) únicamente puede salir del banquillo para colaborar de manera activa con los árbitros en la pacificación o detención de la trifulca."
+                        )
+                        40 -> listOf(
+                            "40.1 Salida obligatoria: Un jugador que acumule 5 faltas (ya sean personales, técnicas o antideportivas) debe ser informado inmediatamente por el árbitro y abandonar el partido.",
+                            "40.2 Plazo de sustitución: El jugador sancionado dispone de un tiempo máximo de 30 segundos para completar su cambio y sentarse en el banquillo.",
+                            "40.3 Infracción posterior: Si un jugador que ya cometió sus 5 faltas vuelve a ingresar o comete una falta posterior en cancha, dicha falta se registrará en el acta como una falta técnica de banquillo atribuida al entrenador."
+                        )
+                        41 -> listOf(
+                            "41.1 Umbral de penalización: Un equipo entra en situación de penalización por faltas colectivas cuando acumula 4 faltas dentro de un mismo cuarto.",
+                            "41.2 Cómputo en descansos y prórrogas: Las faltas cometidas durante los intervalos de descanso entre periodos se consideran acumuladas para el cuarto siguiente. Todas las faltas cometidas durante los tiempos suplementarios (prórrogas) se suman al cómputo de faltas del cuarto periodo.",
+                            "41.3 Sanción por penalización: Una vez alcanzado el límite de 4 faltas en el periodo, cualquier falta personal subsiguiente cometida sobre un rival que no esté en acción de tiro será penalizada con 2 tiros libres, en lugar de otorgar un saque de banda/fondo."
+                        )
+                        42 -> listOf(
+                            "42.1 Definición: Suceden cuando se sancionan múltiples faltas o infracciones adicionales durante la misma interrupción del reloj de juego antes de que el balón vuelva a estar vivo.",
+                            "42.2 Procedimiento de resolución y compensación: Se anotan todas las faltas y se identifican las sanciones en el orden cronológico exacto en que fueron pita das. Las sanciones de idéntico valor señaladas contra ambos equipos (o las faltas dobles) se cancelan y anulan mutuamente en el orden en que ocurrieron. Una vez anuladas, se consideran como si no hubiesen sucedido. La concesión de la posesión del balón como parte de la última sanción aplicable anula cualquier derecho anterior a la posesión. Una vez que el balón queda vivo para administrar el primer tiro libre o saque, las sanciones ya iniciadas no pueden ser objeto de compensaciones posteriores. Si tras cancelar sanciones equivalentes no restan más penas por ejecutar, el juego se reanuda entregando el balón al equipo que tenía el control en el momento de la primera infracción (o mediante la flecha de posesión alterna si no había control claro)."
+                        )
+                        43 -> listOf(
+                            "43.1 Definición: Oportunidad sin oposición concedida a un jugador para sumar 1 punto lanzando desde detrás de la línea de tiro libre y dentro del semicírculo.",
+                            "43.2 Normas para el tirador: Debe efectuar el lanzamiento en un plazo máximo de 5 segundos a partir del momento en que el árbitro ponga el balón a su disposición. No puede realizar fintas o amagos deliberados ni pisar o rebasar la línea de tiro libre hasta que el balón haya entrado en la canasta o tocado el aro.",
+                            "43.3 Normas para los jugadores en los pasillos de rebote: Se permite la ocupación de un máximo de 5 espacios (3 defensores y 2 atacantes) situados de forma alterna a los lados de la botella. Los jugadores no pueden ingresar en la zona restringida (llave) ni tocar el balón hasta que este haya abandonado las manos del lanzador.",
+                            "43.4 Jugadores fuera de los pasillos: Deben permanecer por detrás del arco de 3 puntos y por encima de la prolongación de la línea de tiro libre hasta que el lanzamiento impacte en el aro o concluya la acción.",
+                            "43.5 Penalización por infracción en tiro libre: Si la infracción la comete el propio tirador, el punto no es válido. Si la infracción la comete un defensor y el tiro libre no se convierte, se le concede un intento de repetición al tirador. Si ambos equipos cometen violación simultánea en el último tiro, el punto se anula y el juego se reanuda con un salto/posesión alterna."
+                        )
+                        44 -> listOf(
+                            "44.1 Casos de corrección permitidos: Los árbitros únicamente están facultados para corregir un fallo reglamentario si incurren de forma involuntaria en alguno de los siguientes supuestos: Conceder uno o varios tiros libres no merecidos. Omitir la concesión de uno o varios tiros libres merecidos. Adjudicar o anular puntos por equivocación en el marcador. Permitir que el jugador equivocado ejecute uno o varios tiros libres.",
+                            "44.2 Límite de tiempo para la corrección: El error solo es subsanable si se descubre e identifica antes de que el balón vuelva a estar vivo tras la primera interrupción del reloj de juego posterior a la puesta en marcha del reloj que siguió a la comisión del error.",
+                            "44.3 Efecto tras la expiración: Si transcurre dicho intervalo de tiempo sin que se advierta la falla, la situación queda consolidada y ya no podrá ser modificada bajo ningún concepto."
+                        )
+                        45 -> listOf(
+                            "45.1 Composición de la tripulación: El cuerpo arbitral estará conformado por un árbitro principal (Crew Chief) y uno o dos árbitros auxiliares. Estarán respaldados por la mesa de control, compuesta por: anotador, ayudante de anotador, cronometrador y operador del reloj de tiro, además de un comisionado (si estuviera designado).",
+                            "45.2 Neutralidad e imparcialidad: Ninguno de los colegiados u oficiales de mesa puede pertenecer ni estar vinculado de forma alguna a los equipos contendientes.",
+                            "45.3 Uniformidad: Los árbitros deben vestir la indumentaria homologada por la FIBA (camiseta oficial, pantalón negro, calcetines negros y zapatillas de baloncesto negras) e ir provistos de un silbato."
+                        )
+                        46 -> listOf(
+                            "46.1 Inspección previa: Debe revisar y aprobar todo el equipamiento de juego, la cancha, los relojes, la mesa de control y los dispositivos electrónicos antes del partido.",
+                            "46.2 Elección del balón de juego: Seleccionará el balón oficial de entre los proporcionados por el equipo local o la organización.",
+                            "46.3 Gestión del juego y decisiones de autoridad: Administra el salto entre dos para iniciar el primer cuarto. Posee la facultad de interrumpir o suspender el encuentro si las condiciones de la cancha o el público comprometen la seguridad. Decide sobre cualquier aspecto o eventualidad que no esté explícitamente contemplada en el reglamento (casos imprevisibles).",
+                            "46.4 Revisión en pantalla (IRS - Instant Replay System): Es el único autorizado para revisar el sistema de repetición en vídeo en las situaciones permitidas por el reglamento (como tiros de último segundo, faltas descalificantes o errores de reloj).",
+                            "46.5 Cierre del encuentro: Revisa y firma el acta oficial al finalizar el partido, concluyendo de esta manera la jurisdicción arbitral sobre el juego."
+                        )
+                        47 -> listOf(
+                            "47.1 Competencia en pista: Tienen plena potestad para señalar e imponer sanciones por faltas y violaciones cometidas tanto dentro como fuera de las líneas de demarcación, desde 20 minutos antes de la hora fijada para el partido hasta que suena la señal final y se aprueba el acta.",
+                            "47.2 Uso del silbato: Hacer sonar el silbato detiene inmediatamente el reloj de juego y deja el balón muerto. Los árbitros no deben pitar tras un tiro libre o canasta convertida válida a menos que exista una falta o violación adicional.",
+                            "47.3 Criterio y coherencia: Deben aplicar el reglamento con consistencia y equilibrio, aplicando el principio de \"ventaja/desventaja\" para no interrumpir el juego de manera innecesaria por contactos marginales o sin impacto directo en la acción."
+                        )
+                        48 -> listOf(
+                            "48.1 Registro del acta oficial (Anotador): Cronología de puntos anotados (tiros libres, canastas de 2 y 3 puntos). Registro nominativo de jugadores, quintetos iniciales y sustituciones. Contabilidad de las faltas personales, técnicas y antideportivas de cada jugador (notificando de inmediato al árbitro cuando un jugador alcanza su 5.ª falta). Control del número de tiempos muertos consumidos por cada equipo. Operación de la flecha de posesión alterna.",
+                            "48.2 Manejo del marcador público (Ayudante de anotador): Controla la pantalla del marcador para que refleje fielmente los puntos y faltas registrados por el anotador en el acta en papel o electrónica. Asiste al anotador en la verificación de cualquier discrepancia de puntos o faltas."
+                        )
+                        49 -> listOf(
+                            "49.1 Control del tiempo de juego: Pone en marcha el reloj principal en los saltos (cuando es palmeado), en saques de banda (cuando el balón toca a un jugador en cancha) o en rebotes de tiros libres fallados. Detiene el reloj cuando un árbitro pita falta/violación, cuando se concede un tiempo muerto o cuando se convierte una canasta en los últimos 2 minutos del cuarto periodo o de las prórrogas.",
+                            "49.2 Medición de pausas: Mide la duración exacta de 1 minuto para los tiempos muertos. Controla los intervalos de descanso entre periodos (2 minutos o 15 minutos en el descanso). Emite una señal acústica potente y automática al vencer el tiempo de cada cuarto o prórroga."
+                        )
+                        50 -> listOf(
+                            "50.1 Control del reloj de 24/14 segundos: Inicia o reanuda la cuenta cuando un equipo toma el control de un balón vivo en pista. Restablece el reloj a 24 segundos cuando la posesión cambia de equipo tras una canasta, rebote defensivo o falta cometida en pista trasera por la defensa. Restablece el reloj a 14 segundos tras un rebote ofensivo propio o tras una falta/infracción defensiva en pista delantera cuando restaban menos de 14 segundos en el dispositivo.",
+                            "50.2 Detención e interrupción: Detiene la cuenta (sin reiniciar) cuando el balón sale fuera por toque defensivo sin cambio de control. Apaga o detiene el dispositivo cuando resta menos tiempo en el reloj principal de juego que el tiempo restante en el reloj de tiro (menos de 24 o 14 segundos). Emite una alarma sonora independiente para indicar el agotamiento del tiempo de posesión del equipo atacante."
                         )
                         else -> listOf("Información detallada del artículo $i en proceso...")
                     },
